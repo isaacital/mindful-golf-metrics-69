@@ -1,12 +1,12 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Golf, UserCircle, Timer, Trophy } from "lucide-react";
+import { Trophy, UserCircle, Timer, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const features = [
   {
-    icon: Golf,
+    icon: ArrowUp,
     title: "Course Management",
     description: "Add and manage golf courses with detailed hole information",
   },
