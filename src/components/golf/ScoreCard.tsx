@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -171,14 +170,18 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
               );
             })}
             <tr className="border-t-2 border-gray-300 bg-gray-50">
-              <td colSpan={2} className="py-3 px-4 font-bold">Team A Total</td>
-              <td colSpan={16} className="py-3 px-4 text-right font-bold">
+              <td className="py-3 px-4 font-bold">Team A Total</td>
+              <td className="py-3 px-4"></td>
+              <td colSpan={15} className="py-3 px-4"></td>
+              <td colSpan={2} className="py-3 px-4 text-right font-bold">
                 Gross: {teamScores.A.gross} | Net: {teamScores.A.net}
               </td>
             </tr>
             <tr className="border-t border-gray-300 bg-gray-50">
-              <td colSpan={2} className="py-3 px-4 font-bold">Team B Total</td>
-              <td colSpan={16} className="py-3 px-4 text-right font-bold">
+              <td className="py-3 px-4 font-bold">Team B Total</td>
+              <td className="py-3 px-4"></td>
+              <td colSpan={15} className="py-3 px-4"></td>
+              <td colSpan={2} className="py-3 px-4 text-right font-bold">
                 Gross: {teamScores.B.gross} | Net: {teamScores.B.net}
               </td>
             </tr>
