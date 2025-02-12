@@ -1,11 +1,10 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { CourseSelector } from "@/components/golf/CourseSelector";
 import { AddPlayerForm } from "@/components/golf/AddPlayerForm";
 import { ScoreCard } from "@/components/golf/ScoreCard";
+import { MatchSetup } from "@/components/golf/MatchSetup";
 
-// Sample data (we'll move this to a database later)
 const sampleCourses = [
   {
     id: 1,
@@ -123,6 +122,12 @@ const Index = () => {
     }));
   };
 
+  const calculateTeamScores = (players: Player[]): { teamA: number, teamB: number } => {
+    const teamAScores = players.filter(player => player.team === 'A').reduce((sum, player) => sum + player.scores.reduce((total, score) => total + score, 0), 0);
+    const teamBScores = players.filter(player => player.team === 'B').reduce((sum, player) => sum + player.scores.reduce((total, score) => total + score, 0), 0);
+    return { teamA: teamAScores, teamB: teamBScores };
+  };
+
   return (
     <div className="min-h-screen p-6">
       <motion.div
@@ -156,6 +161,8 @@ const Index = () => {
           onUpdateScore={updateScore}
           onUpdateTeam={updateTeam}
         />
+
+        <MatchSetup teamScores={calculateTeamScores(players)} />
       </motion.div>
     </div>
   );
