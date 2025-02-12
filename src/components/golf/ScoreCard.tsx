@@ -62,7 +62,6 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
               <th className="py-2 px-4 text-center">Out</th>
               <th className="py-2 px-4 text-center">In</th>
               <th className="py-2 px-4 text-center">Total</th>
-              <th className="py-2 px-4 text-center">To Par</th>
               <th className="py-2 px-4 text-center">Net</th>
             </tr>
             <tr className="border-b">
@@ -82,7 +81,6 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
               <th className="py-2 px-4 text-center text-sm text-muted-foreground">
                 {holes.reduce((sum, hole) => sum + hole.par, 0)}
               </th>
-              <th className="py-2 px-4 text-center text-sm text-muted-foreground">-</th>
               <th className="py-2 px-4 text-center text-sm text-muted-foreground">-</th>
             </tr>
           </thead>
@@ -131,8 +129,9 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                   ))}
                   <td className="py-2 px-4 text-center font-medium">{totals.front9}</td>
                   <td className="py-2 px-4 text-center font-medium">{totals.back9}</td>
-                  <td className="py-2 px-4 text-center font-medium">{totals.total}</td>
-                  <td className="py-2 px-4 text-center font-medium">{scoreToPar}</td>
+                  <td className="py-2 px-4 text-center font-medium">
+                    {totals.total} ({scoreToPar})
+                  </td>
                   <td className="py-2 px-4 text-center font-medium">{netScore}</td>
                 </tr>
               );
