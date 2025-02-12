@@ -14,17 +14,29 @@ interface MatchSetupProps {
   players: { name: string; team: 'A' | 'B' }[];
 }
 
+interface ConsolidatedPayment {
+  amount: number;
+  reasons: string[];
+  from: string;
+  to: string;
+}
+
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   const [matchInput, setMatchInput] = useState("");
   const [matchResult, setMatchResult] = useState<any>(null);
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
-    const consolidated = new Map<string, { amount: number; reasons: string[] }>();
+    const consolidated = new Map<string, ConsolidatedPayment>();
     
     payments.forEach(payment => {
       const key = `${payment.from}->${payment.to}`;
       if (!consolidated.has(key)) {
-        consolidated.set(key, { amount: 0, reasons: [], from: payment.from, to: payment.to });
+        consolidated.set(key, {
+          amount: 0,
+          reasons: [],
+          from: payment.from,
+          to: payment.to
+        });
       }
       const current = consolidated.get(key)!;
       current.amount += payment.amount;
