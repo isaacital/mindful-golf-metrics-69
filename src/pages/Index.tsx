@@ -178,7 +178,10 @@ const Index = () => {
           onUpdateTeam={updateTeam}
         />
 
-        <MatchSetup teamScores={calculateTeamScores(players)} />
+        <MatchSetup 
+          teamScores={calculateTeamScores(players)}
+          players={players.map(p => ({ name: p.name, team: p.team }))}
+        />
       </motion.div>
     </div>
   );
