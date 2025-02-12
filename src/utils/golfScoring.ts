@@ -30,7 +30,7 @@ export const formatScoreToPar = (score: number, totalPar: number) => {
 export const getScoreColor = (scoreToPar: string) => {
   if (scoreToPar === "E") return "text-black";
   if (scoreToPar.startsWith("+")) return "text-[#ea384c]";
-  return "text-[#F2FCE2]";
+  return "text-[#50C878]";
 };
 
 export const calculateTeamScores = (players: Player[]): TeamScores => {
