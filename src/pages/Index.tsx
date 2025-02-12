@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -148,7 +149,7 @@ const Index = () => {
               <SelectContent>
                 {selectedCourse.tees.map(tee => (
                   <SelectItem key={tee.color} value={tee.color}>
-                    {tee.color} (Rating: {tee.rating} / Slope: {tee.slope})
+                    {tee.color} ({tee.rating}/{tee.slope})
                   </SelectItem>
                 ))}
               </SelectContent>
