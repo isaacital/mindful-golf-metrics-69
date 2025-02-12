@@ -23,28 +23,33 @@ export const MatchSetup = ({ teamScores }: MatchSetupProps) => {
     if (!result) {
       toast({
         title: "Invalid Input",
-        description: "Please enter a valid match format (e.g., '$10 Nassau' or '$5 skins')",
+        description: "Please enter valid match details (e.g., '$10 Nassau with $5 skins, birdies $2')",
         variant: "destructive",
       });
       return;
     }
 
-    if (result.type === 'nassau') {
-      const nassauResults = calculateNassauResults(
-        {
-          front9: teamScores.A.gross,
-          back9: teamScores.A.gross,
-          total: teamScores.A.gross
-        },
-        {
-          front9: teamScores.B.gross,
-          back9: teamScores.B.gross,
-          total: teamScores.B.gross
-        },
-        result.amount
-      );
-      setMatchResult({ ...result, details: nassauResults });
+    let details = {};
+    if (result.amounts.nassau) {
+      details = {
+        ...details,
+        nassau: calculateNassauResults(
+          {
+            front9: teamScores.A.gross,
+            back9: teamScores.A.gross,
+            total: teamScores.A.gross
+          },
+          {
+            front9: teamScores.B.gross,
+            back9: teamScores.B.gross,
+            total: teamScores.B.gross
+          },
+          result.amounts.nassau
+        )
+      };
     }
+
+    setMatchResult({ ...result, details });
 
     toast({
       title: "Match Setup",
@@ -60,7 +65,7 @@ export const MatchSetup = ({ teamScores }: MatchSetupProps) => {
       <CardContent>
         <div className="flex space-x-4">
           <Input
-            placeholder="Enter match details (e.g., '$10 Nassau' or '$5 skins')"
+            placeholder="Enter match details (e.g., '$10 Nassau with $5 skins, birdies $2')"
             value={matchInput}
             onChange={(e) => setMatchInput(e.target.value)}
             className="flex-1"
@@ -72,14 +77,28 @@ export const MatchSetup = ({ teamScores }: MatchSetupProps) => {
           <div className="mt-4">
             <h3 className="font-bold mb-2">Match Details:</h3>
             <p>{matchResult.description}</p>
-            {matchResult.details && (
+            {matchResult.details?.nassau && (
               <div className="mt-2">
-                <p>Front 9: {matchResult.details.front9.winner} ({matchResult.details.front9.amount})</p>
-                <p>Back 9: {matchResult.details.back9.winner} ({matchResult.details.back9.amount})</p>
-                <p>Total: {matchResult.details.total.winner} ({matchResult.details.total.amount})</p>
-                <p className="font-bold mt-2">Total Payout: ${matchResult.details.totalPayout}</p>
+                <h4 className="font-semibold">Nassau Results:</h4>
+                <p>Front 9: {matchResult.details.nassau.front9.winner} (${matchResult.details.nassau.front9.amount})</p>
+                <p>Back 9: {matchResult.details.nassau.back9.winner} (${matchResult.details.nassau.back9.amount})</p>
+                <p>Total: {matchResult.details.nassau.total.winner} (${matchResult.details.nassau.total.amount})</p>
               </div>
             )}
+            {matchResult.amounts.skins && (
+              <div className="mt-2">
+                <h4 className="font-semibold">Skins:</h4>
+                <p>${matchResult.amounts.skins} per skin</p>
+              </div>
+            )}
+            {(matchResult.amounts.birdies || matchResult.amounts.eagles) && (
+              <div className="mt-2">
+                <h4 className="font-semibold">Bonus Payouts:</h4>
+                {matchResult.amounts.birdies && <p>Birdies: ${matchResult.amounts.birdies} each</p>}
+                {matchResult.amounts.eagles && <p>Eagles: ${matchResult.amounts.eagles} each</p>}
+              </div>
+            )}
+            <p className="font-bold mt-2">Maximum Potential Payout: ${matchResult.totalPayout}</p>
           </div>
         )}
       </CardContent>
