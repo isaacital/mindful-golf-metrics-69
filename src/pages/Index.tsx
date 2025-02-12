@@ -33,8 +33,47 @@ interface Player {
   scores: (number | null)[];
 }
 
+const samplePlayers: Player[] = [
+  {
+    id: "1",
+    name: "John Smith",
+    handicapIndex: 8.4,
+    tee: "Blue",
+    team: 'A',
+    courseHandicap: 10,
+    scores: [4, 5, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 5, 4, 3, 4, 5, 4],
+  },
+  {
+    id: "2",
+    name: "Mike Johnson",
+    handicapIndex: 12.1,
+    tee: "White",
+    team: 'A',
+    courseHandicap: 14,
+    scores: [5, 6, 5, 4, 5, 6, 5, 5, 4, 6, 5, 5, 6, 5, 4, 5, 6, 5],
+  },
+  {
+    id: "3",
+    name: "Sarah Williams",
+    handicapIndex: 15.7,
+    tee: "Red",
+    team: 'B',
+    courseHandicap: 17,
+    scores: [6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5],
+  },
+  {
+    id: "4",
+    name: "David Brown",
+    handicapIndex: 10.3,
+    tee: "White",
+    team: 'B',
+    courseHandicap: 12,
+    scores: [5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4],
+  },
+];
+
 const Index = () => {
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<Player[]>(samplePlayers);
   const [selectedCourse, setSelectedCourse] = useState(sampleCourses[0]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerHandicap, setNewPlayerHandicap] = useState("");
