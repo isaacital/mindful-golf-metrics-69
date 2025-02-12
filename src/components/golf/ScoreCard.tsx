@@ -47,8 +47,33 @@ const getScoreColor = (scoreToPar: string) => {
   return "text-[#F2FCE2]";
 };
 
+const calculateTeamScores = (players: Player[]) => {
+  const teamScores = {
+    A: { gross: 0, net: 0 },
+    B: { gross: 0, net: 0 }
+  };
+
+  players.forEach(player => {
+    const totals = calculateTotals(player.scores);
+    const netScore = totals.total - player.courseHandicap;
+    
+    if (player.team === 'A') {
+      teamScores.A.gross += totals.total;
+      teamScores.A.net += netScore;
+    } else {
+      teamScores.B.gross += totals.total;
+      teamScores.B.net += netScore;
+    }
+  });
+
+  return teamScores;
+};
+
 export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: ScoreCardProps) => {
   if (players.length === 0) return null;
+
+  const totalPar = holes.reduce((sum, hole) => sum + hole.par, 0);
+  const teamScores = calculateTeamScores(players);
 
   return (
     <Card>
@@ -86,7 +111,7 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                 {holes.slice(9, 18).reduce((sum, hole) => sum + hole.par, 0)}
               </th>
               <th className="py-2 px-4 text-center text-sm text-muted-foreground">
-                {holes.reduce((sum, hole) => sum + hole.par, 0)}
+                {totalPar}
               </th>
               <th className="py-2 px-4 text-center text-sm text-muted-foreground">-</th>
             </tr>
@@ -94,7 +119,6 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
           <tbody>
             {players.map((player) => {
               const totals = calculateTotals(player.scores);
-              const totalPar = holes.reduce((sum, hole) => sum + hole.par, 0);
               const scoreToPar = formatScoreToPar(totals.total, totalPar);
               const netScore = totals.total - player.courseHandicap;
               const netScoreToPar = formatScoreToPar(netScore, totalPar);
@@ -146,6 +170,18 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                 </tr>
               );
             })}
+            <tr className="border-t-2 border-gray-300 bg-gray-50">
+              <td colSpan={2} className="py-3 px-4 font-bold">Team A Total</td>
+              <td colSpan={16} className="py-3 px-4 text-right font-bold">
+                Gross: {teamScores.A.gross} | Net: {teamScores.A.net}
+              </td>
+            </tr>
+            <tr className="border-t border-gray-300 bg-gray-50">
+              <td colSpan={2} className="py-3 px-4 font-bold">Team B Total</td>
+              <td colSpan={16} className="py-3 px-4 text-right font-bold">
+                Gross: {teamScores.B.gross} | Net: {teamScores.B.net}
+              </td>
+            </tr>
           </tbody>
         </table>
       </CardContent>
