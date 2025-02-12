@@ -62,6 +62,19 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
             </tr>
             <tr className="border-b">
               <th className="py-2 px-4 text-left"></th>
+              <th className="py-2 px-4 text-left">HCP</th>
+              {holes.map((hole) => (
+                <th key={`handicap-${hole.number}`} className="py-2 px-4 text-center text-sm text-muted-foreground">
+                  {hole.handicap}
+                </th>
+              ))}
+              <th className="py-2 px-4 text-center">-</th>
+              <th className="py-2 px-4 text-center">-</th>
+              <th className="py-2 px-4 text-center">-</th>
+              <th className="py-2 px-4 text-center">-</th>
+            </tr>
+            <tr className="border-b">
+              <th className="py-2 px-4 text-left"></th>
               <th className="py-2 px-4 text-left">Par</th>
               {holes.map((hole) => (
                 <th key={`par-${hole.number}`} className="py-2 px-4 text-center text-sm text-muted-foreground">
