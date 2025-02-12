@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface Player {
   id: string;
@@ -38,6 +39,12 @@ const formatScoreToPar = (score: number, totalPar: number) => {
   const difference = score - totalPar;
   if (difference === 0) return "E";
   return difference > 0 ? `+${difference}` : `${difference}`;
+};
+
+const getScoreColor = (scoreToPar: string) => {
+  if (scoreToPar === "E") return "text-black";
+  if (scoreToPar.startsWith("+")) return "text-[#ea384c]";
+  return "text-[#F2FCE2]";
 };
 
 export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: ScoreCardProps) => {
@@ -90,6 +97,7 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
               const totalPar = holes.reduce((sum, hole) => sum + hole.par, 0);
               const scoreToPar = formatScoreToPar(totals.total, totalPar);
               const netScore = totals.total - player.courseHandicap;
+              const netScoreToPar = formatScoreToPar(netScore, totalPar);
               
               return (
                 <tr key={player.id} className="border-b">
@@ -130,9 +138,11 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                   <td className="py-2 px-4 text-center font-medium">{totals.front9}</td>
                   <td className="py-2 px-4 text-center font-medium">{totals.back9}</td>
                   <td className="py-2 px-4 text-center font-medium">
-                    {totals.total} ({scoreToPar})
+                    {totals.total} <span className={getScoreColor(scoreToPar)}>({scoreToPar})</span>
                   </td>
-                  <td className="py-2 px-4 text-center font-medium">{netScore}</td>
+                  <td className="py-2 px-4 text-center font-medium">
+                    {netScore} <span className={getScoreColor(netScoreToPar)}>({netScoreToPar})</span>
+                  </td>
                 </tr>
               );
             })}
