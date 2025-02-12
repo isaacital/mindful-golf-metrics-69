@@ -172,7 +172,11 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
             <tr className="border-t-2 border-gray-300 bg-gray-50">
               <td className="py-3 px-4 font-bold">Team A Total</td>
               <td className="py-3 px-4"></td>
-              <td colSpan={15} className="py-3 px-4"></td>
+              {Array(18).fill(null).map((_, i) => (
+                <td key={i} className="py-3 px-4"></td>
+              ))}
+              <td className="py-3 px-4"></td>
+              <td className="py-3 px-4"></td>
               <td colSpan={2} className="py-3 px-4 text-right font-bold">
                 Gross: {teamScores.A.gross} | Net: {teamScores.A.net}
               </td>
@@ -180,7 +184,11 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
             <tr className="border-t border-gray-300 bg-gray-50">
               <td className="py-3 px-4 font-bold">Team B Total</td>
               <td className="py-3 px-4"></td>
-              <td colSpan={15} className="py-3 px-4"></td>
+              {Array(18).fill(null).map((_, i) => (
+                <td key={i} className="py-3 px-4"></td>
+              ))}
+              <td className="py-3 px-4"></td>
+              <td className="py-3 px-4"></td>
               <td colSpan={2} className="py-3 px-4 text-right font-bold">
                 Gross: {teamScores.B.gross} | Net: {teamScores.B.net}
               </td>
