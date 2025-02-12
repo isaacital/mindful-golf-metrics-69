@@ -1,13 +1,11 @@
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
 
-// Temporary sample data (we'll move this to a database later)
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { CourseSelector } from "@/components/golf/CourseSelector";
+import { AddPlayerForm } from "@/components/golf/AddPlayerForm";
+import { ScoreCard } from "@/components/golf/ScoreCard";
+
+// Sample data (we'll move this to a database later)
 const sampleCourses = [
   {
     id: 1,
@@ -45,22 +43,7 @@ const Index = () => {
   const calculateCourseHandicap = (handicapIndex: number, tee: string) => {
     const selectedTee = selectedCourse.tees.find(t => t.color === tee);
     if (!selectedTee) return 0;
-    // Course Handicap = Handicap Index × (Slope Rating ÷ 113) + (Course Rating - Par)
-    // For simplicity, we're using a standard par of 72
     return Math.round(handicapIndex * (selectedTee.slope / 113) + (selectedTee.rating - 72));
-  };
-
-  const calculateTotals = (scores: (number | null)[]) => {
-    const front9 = scores.slice(0, 9).reduce((sum, score) => sum + (score || 0), 0);
-    const back9 = scores.slice(9, 18).reduce((sum, score) => sum + (score || 0), 0);
-    const total = front9 + back9;
-    return { front9, back9, total };
-  };
-
-  const formatScoreToPar = (score: number, totalPar: number) => {
-    const difference = score - totalPar;
-    if (difference === 0) return "E";
-    return difference > 0 ? `+${difference}` : `${difference}`;
   };
 
   const addPlayer = () => {
@@ -71,7 +54,7 @@ const Index = () => {
         name: newPlayerName,
         handicapIndex: parseFloat(newPlayerHandicap),
         tee: newPlayerTee,
-        team: players.length % 2 === 0 ? 'A' : 'B', // Alternate teams
+        team: players.length % 2 === 0 ? 'A' : 'B',
         courseHandicap,
         scores: Array(18).fill(null),
       };
@@ -111,165 +94,29 @@ const Index = () => {
       >
         <h1 className="text-4xl font-bold mb-8">Golf Score Tracker</h1>
 
-        {/* Course Selection Card */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Select Course</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select defaultValue={selectedCourse.id.toString()} onValueChange={(value) => 
-              setSelectedCourse(sampleCourses.find(course => course.id.toString() === value)!)
-            }>
-              <SelectTrigger className="w-full md:w-[300px]">
-                <SelectValue placeholder="Select a course" />
-              </SelectTrigger>
-              <SelectContent>
-                {sampleCourses.map(course => (
-                  <SelectItem key={course.id} value={course.id.toString()}>
-                    {course.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        <CourseSelector
+          courses={sampleCourses}
+          selectedCourse={selectedCourse}
+          onCourseChange={setSelectedCourse}
+        />
 
-        {/* Add Player Form */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Add Player</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col md:flex-row gap-4">
-            <Input
-              placeholder="Player Name"
-              value={newPlayerName}
-              onChange={(e) => setNewPlayerName(e.target.value)}
-              className="md:w-[300px]"
-            />
-            <Input
-              placeholder="Handicap Index"
-              type="number"
-              step="0.1"
-              value={newPlayerHandicap}
-              onChange={(e) => setNewPlayerHandicap(e.target.value)}
-              className="md:w-[200px]"
-            />
-            <Select value={newPlayerTee} onValueChange={setNewPlayerTee}>
-              <SelectTrigger className="md:w-[200px]">
-                <SelectValue placeholder="Select tee" />
-              </SelectTrigger>
-              <SelectContent>
-                {selectedCourse.tees.map(tee => (
-                  <SelectItem key={tee.color} value={tee.color}>
-                    {tee.color} ({tee.rating}/{tee.slope})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={addPlayer}>Add Player</Button>
-          </CardContent>
-        </Card>
+        <AddPlayerForm
+          tees={selectedCourse.tees}
+          newPlayerName={newPlayerName}
+          newPlayerHandicap={newPlayerHandicap}
+          newPlayerTee={newPlayerTee}
+          onNameChange={setNewPlayerName}
+          onHandicapChange={setNewPlayerHandicap}
+          onTeeChange={setNewPlayerTee}
+          onAddPlayer={addPlayer}
+        />
 
-        {/* Scoring Table */}
-        {players.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Score Card</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="py-2 px-4 text-left">Player</th>
-                    <th className="py-2 px-4 text-left">Team</th>
-                    {selectedCourse.holes.map((hole) => (
-                      <th key={hole.number} className="py-2 px-4 text-center">
-                        {hole.number}
-                      </th>
-                    ))}
-                    <th className="py-2 px-4 text-center">Out</th>
-                    <th className="py-2 px-4 text-center">In</th>
-                    <th className="py-2 px-4 text-center">Total</th>
-                    <th className="py-2 px-4 text-center">To Par</th>
-                    <th className="py-2 px-4 text-center">Net</th>
-                  </tr>
-                  <tr className="border-b">
-                    <th className="py-2 px-4 text-left"></th>
-                    <th className="py-2 px-4 text-left">Par</th>
-                    {selectedCourse.holes.map((hole) => (
-                      <th key={`par-${hole.number}`} className="py-2 px-4 text-center text-sm text-muted-foreground">
-                        {hole.par}
-                      </th>
-                    ))}
-                    <th className="py-2 px-4 text-center text-sm text-muted-foreground">
-                      {selectedCourse.holes.slice(0, 9).reduce((sum, hole) => sum + hole.par, 0)}
-                    </th>
-                    <th className="py-2 px-4 text-center text-sm text-muted-foreground">
-                      {selectedCourse.holes.slice(9, 18).reduce((sum, hole) => sum + hole.par, 0)}
-                    </th>
-                    <th className="py-2 px-4 text-center text-sm text-muted-foreground">
-                      {selectedCourse.holes.reduce((sum, hole) => sum + hole.par, 0)}
-                    </th>
-                    <th className="py-2 px-4 text-center text-sm text-muted-foreground">-</th>
-                    <th className="py-2 px-4 text-center text-sm text-muted-foreground">-</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {players.map((player) => {
-                    const totals = calculateTotals(player.scores);
-                    const totalPar = selectedCourse.holes.reduce((sum, hole) => sum + hole.par, 0);
-                    const scoreToPar = formatScoreToPar(totals.total, totalPar);
-                    const netScore = totals.total - player.courseHandicap;
-                    
-                    return (
-                      <tr key={player.id} className="border-b">
-                        <td className="py-2 px-4">
-                          {player.name} ({player.handicapIndex}) - {player.tee}
-                          <div className="text-sm text-muted-foreground">
-                            Course Handicap: {player.courseHandicap}
-                          </div>
-                        </td>
-                        <td className="py-2 px-4">
-                          <RadioGroup
-                            value={player.team}
-                            onValueChange={(value: 'A' | 'B') => updateTeam(player.id, value)}
-                            className="flex flex-row space-x-4"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="A" id={`team-a-${player.id}`} />
-                              <Label htmlFor={`team-a-${player.id}`}>A</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="B" id={`team-b-${player.id}`} />
-                              <Label htmlFor={`team-b-${player.id}`}>B</Label>
-                            </div>
-                          </RadioGroup>
-                        </td>
-                        {player.scores.map((score, index) => (
-                          <td key={index} className="py-2 px-4">
-                            <Input
-                              type="number"
-                              value={score || ""}
-                              onChange={(e) => 
-                                updateScore(player.id, index + 1, parseInt(e.target.value))
-                              }
-                              className="w-16 text-center"
-                            />
-                          </td>
-                        ))}
-                        <td className="py-2 px-4 text-center font-medium">{totals.front9}</td>
-                        <td className="py-2 px-4 text-center font-medium">{totals.back9}</td>
-                        <td className="py-2 px-4 text-center font-medium">{totals.total}</td>
-                        <td className="py-2 px-4 text-center font-medium">{scoreToPar}</td>
-                        <td className="py-2 px-4 text-center font-medium">{netScore}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-        )}
+        <ScoreCard
+          players={players}
+          holes={selectedCourse.holes}
+          onUpdateScore={updateScore}
+          onUpdateTeam={updateTeam}
+        />
       </motion.div>
     </div>
   );
