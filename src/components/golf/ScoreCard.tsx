@@ -3,7 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { 
+  calculateHoleScores, 
+  formatScoreToPar, 
+  getScoreColor, 
+  calculateTeamScores 
+} from "@/utils/golfScoring";
 
 interface Player {
   id: string;
@@ -27,47 +32,6 @@ interface ScoreCardProps {
   onUpdateScore: (playerId: string, holeNumber: number, score: number) => void;
   onUpdateTeam: (playerId: string, team: 'A' | 'B') => void;
 }
-
-const calculateTotals = (scores: (number | null)[]) => {
-  const front9 = scores.slice(0, 9).reduce((sum, score) => sum + (score || 0), 0);
-  const back9 = scores.slice(9, 18).reduce((sum, score) => sum + (score || 0), 0);
-  const total = front9 + back9;
-  return { front9, back9, total };
-};
-
-const formatScoreToPar = (score: number, totalPar: number) => {
-  const difference = score - totalPar;
-  if (difference === 0) return "E";
-  return difference > 0 ? `+${difference}` : `${difference}`;
-};
-
-const getScoreColor = (scoreToPar: string) => {
-  if (scoreToPar === "E") return "text-black";
-  if (scoreToPar.startsWith("+")) return "text-[#ea384c]";
-  return "text-[#F2FCE2]";
-};
-
-const calculateTeamScores = (players: Player[]) => {
-  const teamScores = {
-    A: { gross: 0, net: 0 },
-    B: { gross: 0, net: 0 }
-  };
-
-  players.forEach(player => {
-    const totals = calculateTotals(player.scores);
-    const netScore = totals.total - player.courseHandicap;
-    
-    if (player.team === 'A') {
-      teamScores.A.gross += totals.total;
-      teamScores.A.net += netScore;
-    } else {
-      teamScores.B.gross += totals.total;
-      teamScores.B.net += netScore;
-    }
-  });
-
-  return teamScores;
-};
 
 export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: ScoreCardProps) => {
   if (players.length === 0) return null;
@@ -118,7 +82,7 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
           </thead>
           <tbody>
             {players.map((player) => {
-              const totals = calculateTotals(player.scores);
+              const totals = calculateHoleScores(player.scores);
               const scoreToPar = formatScoreToPar(totals.total, totalPar);
               const netScore = totals.total - player.courseHandicap;
               const netScoreToPar = formatScoreToPar(netScore, totalPar);
