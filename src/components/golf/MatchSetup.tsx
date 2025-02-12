@@ -18,6 +18,27 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   const [matchInput, setMatchInput] = useState("");
   const [matchResult, setMatchResult] = useState<any>(null);
 
+  const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
+    const consolidated = new Map<string, { amount: number; reasons: string[] }>();
+    
+    payments.forEach(payment => {
+      const key = `${payment.from}->${payment.to}`;
+      if (!consolidated.has(key)) {
+        consolidated.set(key, { amount: 0, reasons: [], from: payment.from, to: payment.to });
+      }
+      const current = consolidated.get(key)!;
+      current.amount += payment.amount;
+      current.reasons.push(payment.reason);
+    });
+
+    return Array.from(consolidated.values()).map(({ amount, reasons, from, to }) => ({
+      from,
+      to,
+      amount,
+      reason: reasons.join(', ')
+    }));
+  };
+
   const handleMatchSetup = () => {
     const result = parseMatchInput(matchInput);
     
@@ -32,22 +53,27 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
 
     let details = {};
     if (result.amounts.nassau) {
+      const nassauResults = calculateNassauResults(
+        {
+          front9: teamScores.A.gross,
+          back9: teamScores.A.gross,
+          total: teamScores.A.gross
+        },
+        {
+          front9: teamScores.B.gross,
+          back9: teamScores.B.gross,
+          total: teamScores.B.gross
+        },
+        result.amounts.nassau,
+        players
+      );
+
       details = {
         ...details,
-        nassau: calculateNassauResults(
-          {
-            front9: teamScores.A.gross,
-            back9: teamScores.A.gross,
-            total: teamScores.A.gross
-          },
-          {
-            front9: teamScores.B.gross,
-            back9: teamScores.B.gross,
-            total: teamScores.B.gross
-          },
-          result.amounts.nassau,
-          players
-        )
+        nassau: {
+          ...nassauResults,
+          payments: consolidatePayments(nassauResults.payments)
+        }
       };
     }
 
