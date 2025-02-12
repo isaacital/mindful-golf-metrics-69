@@ -122,10 +122,26 @@ const Index = () => {
     }));
   };
 
-  const calculateTeamScores = (players: Player[]): { teamA: number, teamB: number } => {
-    const teamAScores = players.filter(player => player.team === 'A').reduce((sum, player) => sum + player.scores.reduce((total, score) => total + score, 0), 0);
-    const teamBScores = players.filter(player => player.team === 'B').reduce((sum, player) => sum + player.scores.reduce((total, score) => total + score, 0), 0);
-    return { teamA: teamAScores, teamB: teamBScores };
+  const calculateTeamScores = (players: Player[]): { A: { gross: number; net: number }; B: { gross: number; net: number } } => {
+    const scores = {
+      A: { gross: 0, net: 0 },
+      B: { gross: 0, net: 0 }
+    };
+
+    players.forEach(player => {
+      const totalScore = player.scores.reduce((sum, score) => sum + (score || 0), 0);
+      const netScore = totalScore - player.courseHandicap;
+      
+      if (player.team === 'A') {
+        scores.A.gross += totalScore;
+        scores.A.net += netScore;
+      } else {
+        scores.B.gross += totalScore;
+        scores.B.net += netScore;
+      }
+    });
+
+    return scores;
   };
 
   return (
