@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -99,7 +98,7 @@ const Index = () => {
       >
         <h1 className="text-4xl font-bold mb-8">Golf Score Tracker</h1>
 
-        {/* Course Selection */}
+        {/* Course Selection Card */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Select Course</CardTitle>
@@ -149,7 +148,7 @@ const Index = () => {
               <SelectContent>
                 {selectedCourse.tees.map(tee => (
                   <SelectItem key={tee.color} value={tee.color}>
-                    {tee.color}
+                    {tee.color} (Rating: {tee.rating} / Slope: {tee.slope})
                   </SelectItem>
                 ))}
               </SelectContent>
