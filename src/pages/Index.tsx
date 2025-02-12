@@ -176,6 +176,15 @@ const Index = () => {
                       </th>
                     ))}
                   </tr>
+                  <tr className="border-b">
+                    <th className="py-2 px-4 text-left"></th>
+                    <th className="py-2 px-4 text-left">Par</th>
+                    {selectedCourse.holes.map((hole) => (
+                      <th key={`par-${hole.number}`} className="py-2 px-4 text-center text-sm text-muted-foreground">
+                        {hole.par}
+                      </th>
+                    ))}
+                  </tr>
                 </thead>
                 <tbody>
                   {players.map((player) => (
