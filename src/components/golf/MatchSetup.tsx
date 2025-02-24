@@ -58,7 +58,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     if (!result) {
       toast({
         title: "Invalid Input",
-        description: "Please enter valid match details (e.g., '$10 Nassau with $5 skins, birdies $2')",
+        description: "Please enter valid match details (e.g., '$5 Nassau, birdies $1, eagles $3, skins $2')",
         variant: "destructive",
       });
       return;
@@ -94,7 +94,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
 
     toast({
       title: "Match Setup",
-      description: result.description,
+      description: "Match details have been set successfully",
     });
   };
 
@@ -106,7 +106,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       <CardContent>
         <div className="flex space-x-4 mb-6">
           <Input
-            placeholder="Enter match details (e.g., '$10 Nassau with $5 skins, birdies $2')"
+            placeholder="Enter match details (e.g., '$5 Nassau, birdies $1, eagles $3, skins $2')"
             value={matchInput}
             onChange={(e) => setMatchInput(e.target.value)}
             className="flex-1 bg-white/80"
@@ -120,12 +120,22 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 divide-y divide-gray-100"
           >
-            <div className="pb-2">
-              <p className="text-sm text-muted-foreground">{matchResult.description}</p>
+            <div className="pb-4">
+              <div className="flex flex-wrap gap-2">
+                {matchResult.bets.map((bet, index) => (
+                  <div 
+                    key={index}
+                    className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium border border-gray-200"
+                  >
+                    {bet}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {matchResult.details?.nassau && (
               <div className="pt-4 space-y-4">
+                <h4 className="text-sm font-medium mb-2">Nassau Results</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="p-3 bg-white/80 rounded-lg">
                     <div className="text-xs text-muted-foreground">Front 9</div>
@@ -165,30 +175,32 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               </div>
             )}
 
-            <div className="pt-4 space-y-2">
-              {matchResult.amounts.skins && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Skins</span>
-                  <span className="text-sm">${matchResult.amounts.skins} per skin</span>
-                </div>
-              )}
-              {(matchResult.amounts.birdies || matchResult.amounts.eagles) && (
-                <>
-                  {matchResult.amounts.birdies && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Birdies</span>
-                      <span className="text-sm">${matchResult.amounts.birdies} each</span>
-                    </div>
-                  )}
-                  {matchResult.amounts.eagles && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Eagles</span>
-                      <span className="text-sm">${matchResult.amounts.eagles} each</span>
-                    </div>
-                  )}
-                </>
-              )}
-              <div className="flex justify-between items-center pt-2 border-t">
+            {(matchResult.amounts.skins || matchResult.amounts.birdies || matchResult.amounts.eagles) && (
+              <div className="pt-4 space-y-2">
+                <h4 className="text-sm font-medium mb-2">Additional Bets</h4>
+                {matchResult.amounts.skins && (
+                  <div className="flex justify-between items-center p-2 bg-white/80 rounded-lg">
+                    <span className="text-sm font-medium">Skins</span>
+                    <span className="text-sm font-semibold">${matchResult.amounts.skins} per skin</span>
+                  </div>
+                )}
+                {matchResult.amounts.birdies && (
+                  <div className="flex justify-between items-center p-2 bg-white/80 rounded-lg">
+                    <span className="text-sm font-medium">Birdies</span>
+                    <span className="text-sm font-semibold">${matchResult.amounts.birdies} each</span>
+                  </div>
+                )}
+                {matchResult.amounts.eagles && (
+                  <div className="flex justify-between items-center p-2 bg-white/80 rounded-lg">
+                    <span className="text-sm font-medium">Eagles</span>
+                    <span className="text-sm font-semibold">${matchResult.amounts.eagles} each</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="pt-4">
+              <div className="flex justify-between items-center p-3 bg-white/80 rounded-lg">
                 <span className="font-medium">Maximum Potential Payout</span>
                 <span className="font-semibold text-green-600">${matchResult.totalPayout}</span>
               </div>
