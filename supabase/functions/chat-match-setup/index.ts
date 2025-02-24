@@ -8,23 +8,20 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
-  if (!openAIApiKey) {
-    return new Response(
-      JSON.stringify({ error: 'OpenAI API key not configured' }), 
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    )
-  }
-
   try {
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured')
+    }
+
     const { messages } = await req.json()
+    
+    console.log('Received messages:', messages) // Debug log
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -65,19 +62,32 @@ serve(async (req) => {
       }),
     })
 
+    const data = await response.json()
+    console.log('OpenAI response:', data) // Debug log
+
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${await response.text()}`)
+      throw new Error(`OpenAI API error: ${JSON.stringify(data)}`)
     }
 
-    const data = await response.json()
     return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json' 
+      }
     })
   } catch (error) {
-    console.error('Error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    console.error('Error in chat-match-setup:', error) // Debug log
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || 'An error occurred while processing your request' 
+      }), 
+      { 
+        status: 500,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      }
+    )
   }
 })
