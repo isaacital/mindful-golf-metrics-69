@@ -33,7 +33,7 @@ export const EditScoreDialog = ({
 
   const handleScoreChange = (holeNumber: number, value: string) => {
     const score = value === "" ? null : parseInt(value, 10);
-    if (score !== null && !isNaN(score)) {
+    if (score !== null && !isNaN(score) && score > 0) {
       onUpdateScore(player.id, holeNumber, score);
     }
   };
@@ -57,7 +57,7 @@ export const EditScoreDialog = ({
               <Input
                 type="number"
                 value={player.scores[index] || ""}
-                onChange={(e) => handleScoreChange(hole.number, e.target.value)}
+                onChange={(e) => handleScoreChange(index + 1, e.target.value)}
                 className="w-full text-center"
                 min={1}
                 placeholder="-"
