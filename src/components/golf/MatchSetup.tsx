@@ -30,6 +30,7 @@ interface ConsolidatedPayment {
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   const [matchInput, setMatchInput] = useState("");
   const [matchResult, setMatchResult] = useState<any>(null);
+  const [holeScores, setHoleScores] = useState<{ [key: number]: { [key: string]: number } }>({});
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
     const netAmounts = new Map<string, number>();
@@ -95,12 +96,21 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   };
 
   const handleMatchSetup = () => {
+    if (!matchInput.trim()) {
+      toast({
+        title: "Empty Input",
+        description: "Please enter match details",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const result = parseMatchInput(matchInput);
     
     if (!result) {
       toast({
-        title: "Invalid Input",
-        description: "Please enter valid match details (e.g., '$5 Nassau, birdies $1, eagles $3, skins $2')",
+        title: "No Valid Bets Found",
+        description: "Could not detect any valid bet amounts in your input. Try something like '5 Nassau' or '5/5/10'",
         variant: "destructive",
       });
       return;
@@ -108,6 +118,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
 
     let details: any = {};
     let allPayments: any[] = [];
+    let newHoleScores: { [key: number]: { [key: string]: number } } = {};
 
     if (result.amounts.nassau) {
       const nassauResults = calculateNassauResults(
@@ -141,6 +152,15 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
           return 4 + Math.floor(Math.random() * 3);
         })
       );
+      
+      mockScores.forEach((playerScores, playerIndex) => {
+        playerScores.forEach((score, holeIndex) => {
+          if (!newHoleScores[holeIndex + 1]) {
+            newHoleScores[holeIndex + 1] = {};
+          }
+          newHoleScores[holeIndex + 1][players[playerIndex].name] = score;
+        });
+      });
       
       const skinsResults = calculateSkinsResults(mockScores, result.amounts.skins, players);
       details.skins = skinsResults;
@@ -187,7 +207,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     details.consolidatedPayments = consolidatePayments(allPayments);
-
+    setHoleScores(newHoleScores);
     setMatchResult({ ...result, details });
 
     toast({
@@ -204,7 +224,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       <CardContent>
         <div className="flex space-x-4 mb-6">
           <Input
-            placeholder="Enter match details (e.g., '$5 Nassau, birdies $1, eagles $3, skins $2')"
+            placeholder="Enter match details (e.g., '5/5/10' or '$5 Nassau, birdies $1, eagles $3, skins $2')"
             value={matchInput}
             onChange={(e) => setMatchInput(e.target.value)}
             className="flex-1 bg-white/80"
@@ -260,7 +280,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
                 {matchResult.details.skins.skins.map((skin: any, index: number) => (
                   <div key={index} className="flex justify-between items-center p-2 bg-white/80 rounded-lg">
                     <span className="text-sm">
-                      Hole {skin.hole} - {skin.winner}
+                      Hole {skin.hole} - {skin.winner} ({holeScores[skin.hole]?.[skin.winner]})
                     </span>
                     <span className="text-sm font-semibold text-green-600">${skin.amount}</span>
                   </div>
