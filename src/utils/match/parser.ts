@@ -29,21 +29,21 @@ export const parseMatchInput = (input: string): MatchResult | null => {
     const amount = parseInt(skinsMatch[1]);
     result.type.push('skins');
     result.amounts.skins = amount;
-    result.bets.push(`$${amount} Skins per hole`);
+    result.bets.push(`$${amount} Skins`);
   }
 
   if (birdiesMatch) {
     const amount = parseInt(birdiesMatch[1]);
     result.type.push('birdies');
     result.amounts.birdies = amount;
-    result.bets.push(`$${amount} per Birdie`);
+    result.bets.push(`$${amount} Birdies`);
   }
 
   if (eaglesMatch) {
     const amount = parseInt(eaglesMatch[1]);
     result.type.push('eagles');
     result.amounts.eagles = amount;
-    result.bets.push(`$${amount} per Eagle`);
+    result.bets.push(`$${amount} Eagles`);
   }
 
   if (result.type.length === 0) return null;

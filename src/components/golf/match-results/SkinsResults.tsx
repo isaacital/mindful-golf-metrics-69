@@ -17,9 +17,6 @@ export const SkinsResults = ({ skins, holeScores }: SkinsResultsProps) => {
     <div className="pt-4 space-y-2">
       <div className="flex items-center gap-2">
         <h4 className="text-sm font-medium">Skins Results</h4>
-        <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
-          Skins Game
-        </span>
       </div>
       {skins.map((skin, index) => (
         <div

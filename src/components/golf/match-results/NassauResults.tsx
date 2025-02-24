@@ -14,9 +14,6 @@ export const NassauResults = ({ nassau }: NassauResultsProps) => {
     <div className="pt-4 space-y-4">
       <div className="flex items-center gap-2">
         <h4 className="text-sm font-medium">Nassau Results</h4>
-        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
-          Nassau Match
-        </span>
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="p-3 bg-white/80 rounded-lg">

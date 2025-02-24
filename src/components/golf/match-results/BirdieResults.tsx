@@ -16,9 +16,6 @@ export const BirdieResults = ({ birdies }: BirdieResultsProps) => {
     <div className="pt-4 space-y-2">
       <div className="flex items-center gap-2">
         <h4 className="text-sm font-medium">Birdie Results</h4>
-        <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
-          Birdie Pot
-        </span>
       </div>
       {birdies.map((birdie, index) => (
         <div

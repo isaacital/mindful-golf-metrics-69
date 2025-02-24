@@ -211,10 +211,10 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
             >
               <div className="pb-4">
                 <div className="flex flex-wrap gap-2">
-                  {matchResult.bets?.map((bet: string, index: number) => (
+                  {matchResult.bets?.map((bet, index) => (
                     <div 
                       key={index}
-                      className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium border border-gray-200"
+                      className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium shadow-sm border border-gray-100"
                     >
                       {bet}
                     </div>
