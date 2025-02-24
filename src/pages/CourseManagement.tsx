@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
@@ -108,16 +109,18 @@ export default function CourseManagement() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container max-w-3xl mx-auto px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>Add New Course</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-8">
-              <div>
+              <div className="space-y-2">
+                <Label htmlFor="courseName">Course Name</Label>
                 <Input
-                  placeholder="Course Name"
+                  id="courseName"
+                  placeholder="Enter course name"
                   value={courseName}
                   onChange={(e) => setCourseName(e.target.value)}
                   required
@@ -128,27 +131,36 @@ export default function CourseManagement() {
                 <h3 className="text-lg font-semibold">Tees</h3>
                 {tees.map((tee, index) => (
                   <div key={index} className="grid grid-cols-3 gap-4">
-                    <Input
-                      placeholder="Color"
-                      value={tee.color}
-                      onChange={(e) => handleTeeChange(index, "color", e.target.value)}
-                      required
-                    />
-                    <Input
-                      type="number"
-                      step="0.1"
-                      placeholder="Rating"
-                      value={tee.rating}
-                      onChange={(e) => handleTeeChange(index, "rating", parseFloat(e.target.value))}
-                      required
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Slope"
-                      value={tee.slope}
-                      onChange={(e) => handleTeeChange(index, "slope", parseInt(e.target.value))}
-                      required
-                    />
+                    <div>
+                      <Label>Color</Label>
+                      <Input
+                        placeholder="Color"
+                        value={tee.color}
+                        onChange={(e) => handleTeeChange(index, "color", e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Rating</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        placeholder="Rating"
+                        value={tee.rating}
+                        onChange={(e) => handleTeeChange(index, "rating", parseFloat(e.target.value))}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Slope</Label>
+                      <Input
+                        type="number"
+                        placeholder="Slope"
+                        value={tee.slope}
+                        onChange={(e) => handleTeeChange(index, "slope", parseInt(e.target.value))}
+                        required
+                      />
+                    </div>
                   </div>
                 ))}
                 <Button type="button" variant="outline" onClick={handleAddTee}>
@@ -156,27 +168,33 @@ export default function CourseManagement() {
                 </Button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <h3 className="text-lg font-semibold">Holes</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-6">
                   {holes.map((hole, index) => (
-                    <div key={index} className="space-y-2">
-                      <h4>Hole {hole.number}</h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Par"
-                          value={hole.par}
-                          onChange={(e) => handleHoleChange(index, "par", parseInt(e.target.value))}
-                          required
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Handicap"
-                          value={hole.handicap}
-                          onChange={(e) => handleHoleChange(index, "handicap", parseInt(e.target.value))}
-                          required
-                        />
+                    <div key={index} className="space-y-4 p-4 border rounded-lg">
+                      <h4 className="font-medium">Hole {hole.number}</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`hole-${index}-par`}>Par</Label>
+                          <Input
+                            id={`hole-${index}-par`}
+                            type="number"
+                            value={hole.par}
+                            onChange={(e) => handleHoleChange(index, "par", parseInt(e.target.value))}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`hole-${index}-handicap`}>Hole HCP</Label>
+                          <Input
+                            id={`hole-${index}-handicap`}
+                            type="number"
+                            value={hole.handicap}
+                            onChange={(e) => handleHoleChange(index, "handicap", parseInt(e.target.value))}
+                            required
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
