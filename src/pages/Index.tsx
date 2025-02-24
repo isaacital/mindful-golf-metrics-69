@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { Header } from "@/components/layout/Header";
 import { CourseSelector } from "@/components/golf/CourseSelector";
 import { AddPlayerForm } from "@/components/golf/AddPlayerForm";
 import { ScoreCard } from "@/components/golf/ScoreCard";
@@ -146,48 +147,49 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6 max-w-[1600px] mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="space-y-6"
-      >
-        <h1 className="text-4xl font-bold">Golf Score Tracker</h1>
+    <div>
+      <Header />
+      <div className="min-h-screen p-4 md:p-6 max-w-[1600px] mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-6"
+        >
+          <CourseSelector
+            courses={sampleCourses}
+            selectedCourse={selectedCourse}
+            onCourseChange={setSelectedCourse}
+          />
 
-        <CourseSelector
-          courses={sampleCourses}
-          selectedCourse={selectedCourse}
-          onCourseChange={setSelectedCourse}
-        />
+          <AddPlayerForm
+            tees={selectedCourse.tees}
+            newPlayerName={newPlayerName}
+            newPlayerHandicap={newPlayerHandicap}
+            newPlayerTee={newPlayerTee}
+            onNameChange={setNewPlayerName}
+            onHandicapChange={setNewPlayerHandicap}
+            onTeeChange={setNewPlayerTee}
+            onAddPlayer={addPlayer}
+          />
 
-        <AddPlayerForm
-          tees={selectedCourse.tees}
-          newPlayerName={newPlayerName}
-          newPlayerHandicap={newPlayerHandicap}
-          newPlayerTee={newPlayerTee}
-          onNameChange={setNewPlayerName}
-          onHandicapChange={setNewPlayerHandicap}
-          onTeeChange={setNewPlayerTee}
-          onAddPlayer={addPlayer}
-        />
-
-        <div className="overflow-auto">
-          <div className="min-w-[1200px]">
-            <ScoreCard
-              players={players}
-              holes={selectedCourse.holes}
-              onUpdateScore={updateScore}
-              onUpdateTeam={updateTeam}
-            />
+          <div className="overflow-auto">
+            <div className="min-w-[1200px]">
+              <ScoreCard
+                players={players}
+                holes={selectedCourse.holes}
+                onUpdateScore={updateScore}
+                onUpdateTeam={updateTeam}
+              />
+            </div>
           </div>
-        </div>
 
-        <MatchSetup 
-          teamScores={calculateTeamScores(players)}
-          players={players.map(p => ({ name: p.name, team: p.team }))}
-        />
-      </motion.div>
+          <MatchSetup 
+            teamScores={calculateTeamScores(players)}
+            players={players.map(p => ({ name: p.name, team: p.team }))}
+          />
+        </motion.div>
+      </div>
     </div>
   );
 };
