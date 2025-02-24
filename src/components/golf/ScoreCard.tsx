@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -40,26 +39,26 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
   const teamScores = calculateTeamScores(players);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="bg-white/50 backdrop-blur-sm shadow-lg">
+      <CardHeader className="pb-3">
         <CardTitle>Score Card</CardTitle>
       </CardHeader>
-      <CardContent className="w-full">
-        <div className="w-full">
+      <CardContent>
+        <div>
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b">
-                <th className="py-2 px-2 text-left min-w-[200px]">Player</th>
-                <th className="py-2 px-2 text-left w-[100px]">Team</th>
+                <th className="py-2 px-2 text-left w-[180px]">Player</th>
+                <th className="py-2 px-2 text-left w-[80px]">Team</th>
                 {holes.map((hole) => (
-                  <th key={hole.number} className="py-2 px-1 text-center w-12">
+                  <th key={hole.number} className="py-2 px-1 text-center w-[45px]">
                     {hole.number}
                   </th>
                 ))}
-                <th className="py-2 px-1 text-center w-12">Out</th>
-                <th className="py-2 px-1 text-center w-12">In</th>
-                <th className="py-2 px-1 text-center w-16">Total</th>
-                <th className="py-2 px-1 text-center w-16">Net</th>
+                <th className="py-2 px-1 text-center w-[45px]">Out</th>
+                <th className="py-2 px-1 text-center w-[45px]">In</th>
+                <th className="py-2 px-1 text-center w-[60px]">Total</th>
+                <th className="py-2 px-1 text-center w-[60px]">Net</th>
               </tr>
               <tr className="border-b">
                 <th className="py-2 px-2 text-left"></th>
@@ -104,7 +103,7 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                 return (
                   <tr key={player.id} className="border-b">
                     <td className="py-2 px-2">
-                      <div className="text-sm font-medium">{player.name}</div>
+                      <div className="text-sm font-medium truncate">{player.name}</div>
                       <div className="text-xs text-muted-foreground">
                         ({player.handicapIndex}) - {player.tee}
                         <br />
@@ -115,36 +114,36 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                       <RadioGroup
                         value={player.team}
                         onValueChange={(value: 'A' | 'B') => onUpdateTeam(player.id, value)}
-                        className="flex flex-row gap-2"
+                        className="flex flex-row gap-1"
                       >
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                           <RadioGroupItem value="A" id={`team-a-${player.id}`} className="h-3 w-3" />
                           <Label htmlFor={`team-a-${player.id}`} className="text-xs">A</Label>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                           <RadioGroupItem value="B" id={`team-b-${player.id}`} className="h-3 w-3" />
                           <Label htmlFor={`team-b-${player.id}`} className="text-xs">B</Label>
                         </div>
                       </RadioGroup>
                     </td>
                     {player.scores.map((score, index) => (
-                      <td key={index} className="py-2 px-1">
+                      <td key={index} className="py-1 px-0.5">
                         <Input
                           type="number"
                           value={score || ""}
                           onChange={(e) => 
                             onUpdateScore(player.id, index + 1, parseInt(e.target.value))
                           }
-                          className="w-10 h-8 text-center p-0 text-sm"
+                          className="w-9 h-7 text-center p-0 text-sm"
                         />
                       </td>
                     ))}
-                    <td className="py-2 px-1 text-center font-medium text-sm">{totals.front9}</td>
-                    <td className="py-2 px-1 text-center font-medium text-sm">{totals.back9}</td>
-                    <td className="py-2 px-1 text-center font-medium text-sm">
+                    <td className="py-1 px-0.5 text-center font-medium text-sm">{totals.front9}</td>
+                    <td className="py-1 px-0.5 text-center font-medium text-sm">{totals.back9}</td>
+                    <td className="py-1 px-0.5 text-center font-medium text-sm">
                       {totals.total} <span className={getScoreColor(scoreToPar)}>({scoreToPar})</span>
                     </td>
-                    <td className="py-2 px-1 text-center font-medium text-sm">
+                    <td className="py-1 px-0.5 text-center font-medium text-sm">
                       {netScore} <span className={getScoreColor(netScoreToPar)}>({netScoreToPar})</span>
                     </td>
                   </tr>

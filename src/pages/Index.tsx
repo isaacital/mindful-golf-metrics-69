@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { CourseSelector } from "@/components/golf/CourseSelector";
@@ -145,14 +146,14 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-4 md:p-6 max-w-[1600px] mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-6xl mx-auto"
+        className="space-y-6"
       >
-        <h1 className="text-4xl font-bold mb-8">Golf Score Tracker</h1>
+        <h1 className="text-4xl font-bold">Golf Score Tracker</h1>
 
         <CourseSelector
           courses={sampleCourses}
@@ -171,12 +172,16 @@ const Index = () => {
           onAddPlayer={addPlayer}
         />
 
-        <ScoreCard
-          players={players}
-          holes={selectedCourse.holes}
-          onUpdateScore={updateScore}
-          onUpdateTeam={updateTeam}
-        />
+        <div className="overflow-auto">
+          <div className="min-w-[1200px]">
+            <ScoreCard
+              players={players}
+              holes={selectedCourse.holes}
+              onUpdateScore={updateScore}
+              onUpdateTeam={updateTeam}
+            />
+          </div>
+        </div>
 
         <MatchSetup 
           teamScores={calculateTeamScores(players)}
