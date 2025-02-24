@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -12,6 +11,17 @@ import {
   getScoreColor, 
   calculateTeamScores 
 } from "@/utils/golfScoring";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface Player {
   id: string;
@@ -54,10 +64,23 @@ export const ScoreCard = ({
   onUpdateTee,
   onRemovePlayer 
 }: ScoreCardProps) => {
+  const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
+  
   if (players.length === 0) return null;
 
   const totalPar = holes.reduce((sum, hole) => sum + hole.par, 0);
   const teamScores = calculateTeamScores(players);
+
+  const handleDelete = (player: Player) => {
+    setPlayerToDelete(player);
+  };
+
+  const confirmDelete = () => {
+    if (playerToDelete) {
+      onRemovePlayer(playerToDelete.id);
+      setPlayerToDelete(null);
+    }
+  };
 
   return (
     <Card className="bg-white/50 backdrop-blur-sm shadow-lg">
@@ -69,6 +92,7 @@ export const ScoreCard = ({
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b">
+                <th className="py-2 px-2 text-left w-[40px]"></th>
                 <th className="py-2 px-2 text-left w-[180px]">Player</th>
                 <th className="py-2 px-2 text-left w-[80px]">Team</th>
                 <th className="py-2 px-2 text-left w-[120px]">Tee</th>
@@ -81,7 +105,6 @@ export const ScoreCard = ({
                 <th className="py-2 px-1 text-center w-[45px]">In</th>
                 <th className="py-2 px-1 text-center w-[60px]">Total</th>
                 <th className="py-2 px-1 text-center w-[60px]">Net</th>
-                <th className="py-2 px-1 text-center w-[60px]">Actions</th>
               </tr>
               <tr className="border-b">
                 <th className="py-2 px-2 text-left"></th>
@@ -129,6 +152,16 @@ export const ScoreCard = ({
                 
                 return (
                   <tr key={player.id} className="border-b">
+                    <td className="py-2 px-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(player)}
+                        className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
                     <td className="py-2 px-2">
                       <div className="text-sm font-medium truncate">{player.name}</div>
                       <div className="text-xs text-muted-foreground">
@@ -187,16 +220,6 @@ export const ScoreCard = ({
                     <td className="py-1 px-0.5 text-center font-medium text-sm">
                       {netScore} <span className={getScoreColor(netScoreToPar)}>({netScoreToPar})</span>
                     </td>
-                    <td className="py-1 px-0.5 text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onRemovePlayer(player.id)}
-                        className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-100"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
                   </tr>
                 );
               })}
@@ -216,6 +239,22 @@ export const ScoreCard = ({
           </table>
         </div>
       </CardContent>
+
+      <AlertDialog open={!!playerToDelete} onOpenChange={() => setPlayerToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Player</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {playerToDelete?.name} from this match? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Remove</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
