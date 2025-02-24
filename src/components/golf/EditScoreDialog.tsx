@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface EditScoreDialogProps {
   open: boolean;
@@ -31,10 +32,22 @@ export const EditScoreDialog = ({
 }: EditScoreDialogProps) => {
   if (!player) return null;
 
-  const handleScoreChange = (holeNumber: number, value: string) => {
+  const [scores, setScores] = useState<(number | null)[]>(player.scores);
+
+  useEffect(() => {
+    if (player) {
+      setScores(player.scores);
+    }
+  }, [player]);
+
+  const handleScoreChange = (index: number, value: string) => {
     const score = value === "" ? null : parseInt(value, 10);
+    const newScores = [...scores];
+    newScores[index] = score;
+    setScores(newScores);
+
     if (score !== null && !isNaN(score) && score > 0) {
-      onUpdateScore(player.id, holeNumber, score);
+      onUpdateScore(player.id, index + 1, score);
     }
   };
 
@@ -56,8 +69,8 @@ export const EditScoreDialog = ({
               </div>
               <Input
                 type="number"
-                value={player.scores[index] || ""}
-                onChange={(e) => handleScoreChange(index + 1, e.target.value)}
+                value={scores[index] === null ? "" : scores[index]}
+                onChange={(e) => handleScoreChange(index, e.target.value)}
                 className="w-full text-center"
                 min={1}
                 placeholder="-"
