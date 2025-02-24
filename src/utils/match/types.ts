@@ -1,6 +1,11 @@
 
 export interface MatchResult {
   type: ('nassau' | 'match' | 'skins' | 'birdies' | 'eagles' | 'best-ball' | 'press')[];
+  scoringFormat: {
+    type: 'stroke' | 'match';
+    teamScoring: 'aggregate' | 'best-ball' | 'two-best-balls';
+    handicapPercentage: 100 | 90 | 85 | 75 | 50 | 0;
+  };
   amounts: {
     nassau?: number;
     skins?: number;
