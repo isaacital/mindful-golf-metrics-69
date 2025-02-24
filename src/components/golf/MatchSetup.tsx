@@ -9,7 +9,7 @@ import {
   calculateSkinsResults,
   calculateBirdieResults,
   calculateEagleResults
-} from "@/utils/matchCalculations";
+} from "@/utils/match";  // Updated import path
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 
