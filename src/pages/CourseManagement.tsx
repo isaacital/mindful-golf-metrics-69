@@ -109,7 +109,7 @@ export default function CourseManagement() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container max-w-3xl mx-auto px-4 py-8">
+      <main className="container max-w-2xl mx-auto px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>Add New Course</CardTitle>
@@ -168,14 +168,14 @@ export default function CourseManagement() {
                 </Button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Holes</h3>
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {holes.map((hole, index) => (
-                    <div key={index} className="space-y-4 p-4 border rounded-lg">
+                    <div key={index} className="space-y-2 p-3 border rounded-lg">
                       <h4 className="font-medium">Hole {hole.number}</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
                           <Label htmlFor={`hole-${index}-par`}>Par</Label>
                           <Input
                             id={`hole-${index}-par`}
@@ -185,7 +185,7 @@ export default function CourseManagement() {
                             required
                           />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <Label htmlFor={`hole-${index}-handicap`}>Hole HCP</Label>
                           <Input
                             id={`hole-${index}-handicap`}
