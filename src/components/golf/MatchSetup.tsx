@@ -12,6 +12,11 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { MatchSetupChat } from "./MatchSetupChat";
+import { NassauResults } from "./match-results/NassauResults";
+import { SkinsResults } from "./match-results/SkinsResults";
+import { BirdieResults } from "./match-results/BirdieResults";
+import { EagleResults } from "./match-results/EagleResults";
+import { PaymentSummary } from "./match-results/PaymentSummary";
 
 interface MatchSetupProps {
   teamScores: {
@@ -19,13 +24,6 @@ interface MatchSetupProps {
     B: { gross: number; net: number };
   };
   players: { name: string; team: 'A' | 'B' }[];
-}
-
-interface ConsolidatedPayment {
-  amount: number;
-  reasons: string[];
-  from: string;
-  to: string;
 }
 
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
@@ -258,93 +256,27 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               </div>
 
               {matchResult.details?.nassau && (
-                <div className="pt-4 space-y-4">
-                  <h4 className="text-sm font-medium mb-2">Nassau Results</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="p-3 bg-white/80 rounded-lg">
-                      <div className="text-xs text-muted-foreground">Front 9</div>
-                      <div className="font-medium">{matchResult.details.nassau.front9.winner}</div>
-                      <div className="text-sm font-semibold text-green-600">${matchResult.details.nassau.front9.amount}</div>
-                    </div>
-                    <div className="p-3 bg-white/80 rounded-lg">
-                      <div className="text-xs text-muted-foreground">Back 9</div>
-                      <div className="font-medium">{matchResult.details.nassau.back9.winner}</div>
-                      <div className="text-sm font-semibold text-green-600">${matchResult.details.nassau.back9.amount}</div>
-                    </div>
-                    <div className="p-3 bg-white/80 rounded-lg">
-                      <div className="text-xs text-muted-foreground">Total</div>
-                      <div className="font-medium">{matchResult.details.nassau.total.winner}</div>
-                      <div className="text-sm font-semibold text-green-600">${matchResult.details.nassau.total.amount}</div>
-                    </div>
-                  </div>
-                </div>
+                <NassauResults nassau={matchResult.details.nassau} />
               )}
 
               {matchResult.details?.skins?.skins?.length > 0 && (
-                <div className="pt-4 space-y-2">
-                  <h4 className="text-sm font-medium mb-2">Skins Results</h4>
-                  {matchResult.details.skins.skins.map((skin: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-white/80 rounded-lg">
-                      <span className="text-sm">
-                        Hole {skin.hole} - {skin.winner} ({holeScores[skin.hole]?.[skin.winner]})
-                      </span>
-                      <span className="text-sm font-semibold text-green-600">${skin.amount}</span>
-                    </div>
-                  ))}
-                </div>
+                <SkinsResults 
+                  skins={matchResult.details.skins.skins} 
+                  holeScores={holeScores}
+                />
               )}
 
               {matchResult.details?.birdies?.birdies?.length > 0 && (
-                <div className="pt-4 space-y-2">
-                  <h4 className="text-sm font-medium mb-2">Birdie Results</h4>
-                  {matchResult.details.birdies.birdies.map((birdie: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-white/80 rounded-lg">
-                      <span className="text-sm">
-                        Hole {birdie.hole} - {birdie.player}
-                      </span>
-                      <span className="text-sm font-semibold text-green-600">${birdie.amount}</span>
-                    </div>
-                  ))}
-                </div>
+                <BirdieResults birdies={matchResult.details.birdies.birdies} />
               )}
 
               {matchResult.details?.eagles?.eagles?.length > 0 && (
-                <div className="pt-4 space-y-2">
-                  <h4 className="text-sm font-medium mb-2">Eagle Results</h4>
-                  {matchResult.details.eagles.eagles.map((eagle: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-white/80 rounded-lg">
-                      <span className="text-sm">
-                        Hole {eagle.hole} - {eagle.player}
-                      </span>
-                      <span className="text-sm font-semibold text-green-600">${eagle.amount}</span>
-                    </div>
-                  ))}
-                </div>
+                <EagleResults eagles={matchResult.details.eagles.eagles} />
               )}
 
-              <div className="pt-4">
-                <h4 className="text-sm font-medium mb-2">Final Payment Summary</h4>
-                <div className="space-y-4">
-                  {matchResult.details.consolidatedPayments?.map((payment: any, index: number) => (
-                    <div key={index} className="p-3 bg-white/80 rounded-lg">
-                      <div className="text-sm font-medium text-red-500 mb-2">
-                        {payment.from} owes:
-                      </div>
-                      <div className="space-y-2 pl-4">
-                        {payment.payees.map((payee: any, pIndex: number) => (
-                          <div key={pIndex} className="text-sm flex items-center justify-between">
-                            <div>
-                              <span className="text-green-600 font-medium">{payee.to}</span>
-                              <span className="text-xs text-muted-foreground ml-2">({payee.reason})</span>
-                            </div>
-                            <div className="font-semibold">${payee.amount}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {matchResult.details.consolidatedPayments && (
+                <PaymentSummary payments={matchResult.details.consolidatedPayments} />
+              )}
             </motion.div>
           )}
         </div>
