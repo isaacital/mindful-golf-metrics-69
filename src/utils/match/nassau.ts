@@ -25,86 +25,85 @@ export const calculateNassauResults = (
 
   const teamAPlayers = players.filter(p => p.team === 'A');
   const teamBPlayers = players.filter(p => p.team === 'B');
-  const amountPerPlayer = amount / Math.min(teamAPlayers.length, teamBPlayers.length);
 
   // Front 9
   if (teamAScores.front9 < teamBScores.front9) {
-    results.front9 = { winner: 'Team A', amount };
-    teamBPlayers.forEach((loser, idx) => {
-      if (idx < teamAPlayers.length) {
+    results.front9 = { winner: 'Team A', amount: amount * teamAPlayers.length };
+    teamBPlayers.forEach(loser => {
+      teamAPlayers.forEach(winner => {
         results.payments.push({
           from: loser.name,
-          to: teamAPlayers[idx].name,
-          amount: amountPerPlayer,
+          to: winner.name,
+          amount: amount,
           reason: 'Front 9'
         });
-      }
+      });
     });
   } else if (teamBScores.front9 < teamAScores.front9) {
-    results.front9 = { winner: 'Team B', amount };
-    teamAPlayers.forEach((loser, idx) => {
-      if (idx < teamBPlayers.length) {
+    results.front9 = { winner: 'Team B', amount: amount * teamBPlayers.length };
+    teamAPlayers.forEach(loser => {
+      teamBPlayers.forEach(winner => {
         results.payments.push({
           from: loser.name,
-          to: teamBPlayers[idx].name,
-          amount: amountPerPlayer,
+          to: winner.name,
+          amount: amount,
           reason: 'Front 9'
         });
-      }
+      });
     });
   }
 
   // Back 9
   if (teamAScores.back9 < teamBScores.back9) {
-    results.back9 = { winner: 'Team A', amount };
-    teamBPlayers.forEach((loser, idx) => {
-      if (idx < teamAPlayers.length) {
+    results.back9 = { winner: 'Team A', amount: amount * teamAPlayers.length };
+    teamBPlayers.forEach(loser => {
+      teamAPlayers.forEach(winner => {
         results.payments.push({
           from: loser.name,
-          to: teamAPlayers[idx].name,
-          amount: amountPerPlayer,
+          to: winner.name,
+          amount: amount,
           reason: 'Back 9'
         });
-      }
+      });
     });
   } else if (teamBScores.back9 < teamAScores.back9) {
-    results.back9 = { winner: 'Team B', amount };
-    teamAPlayers.forEach((loser, idx) => {
-      if (idx < teamBPlayers.length) {
+    results.back9 = { winner: 'Team B', amount: amount * teamBPlayers.length };
+    teamAPlayers.forEach(loser => {
+      teamBPlayers.forEach(winner => {
         results.payments.push({
           from: loser.name,
-          to: teamBPlayers[idx].name,
-          amount: amountPerPlayer,
+          to: winner.name,
+          amount: amount,
           reason: 'Back 9'
         });
-      }
+      });
     });
   }
 
   // Total
   if (teamAScores.total < teamBScores.total) {
-    results.total = { winner: 'Team A', amount };
-    teamBPlayers.forEach((loser, idx) => {
-      if (idx < teamAPlayers.length) {
+    results.total = { winner: 'Team A', amount: amount * teamAPlayers.length };
+    teamBPlayers.forEach(loser => {
+      teamAPlayers.forEach(winner => {
         results.payments.push({
           from: loser.name,
-          to: teamAPlayers[idx].name,
-          amount: amountPerPlayer,
+          to: winner.name,
+          amount: amount,
           reason: 'Total Match'
         });
-      }
+      });
     });
   } else if (teamBScores.total < teamAScores.total) {
-    results.total = { winner: 'Team B', amount };
-    teamAPlayers.forEach((loser, idx) => {
-      if (idx < teamBPlayers.length) {
+    results.total = { winner: 'Team B', amount: amount * teamBPlayers.length };
+    teamAPlayers.forEach(loser => {
+      teamBPlayers.forEach(winner => {
         results.payments.push({
           from: loser.name,
-          to: teamBPlayers[idx].name,
-          amount: amountPerPlayer,
+          to: winner.name,
+          amount: amount,
           reason: 'Total Match'
         });
-      }
+      });
     });
   }
 
