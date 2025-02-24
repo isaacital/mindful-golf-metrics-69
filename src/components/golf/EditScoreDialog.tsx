@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface EditScoreDialogProps {
@@ -80,7 +80,12 @@ export const EditScoreDialog = ({
         </div>
         <div className="flex justify-end space-x-2 mt-4">
           <Button variant="outline" onClick={onClose}>
-            <X className="w-4 h-4 mr-2" /> Close
+            <X className="w-4 h-4 mr-2" />
+            Cancel
+          </Button>
+          <Button onClick={onClose}>
+            <Check className="w-4 h-4 mr-2" />
+            Save Changes
           </Button>
         </div>
       </DialogContent>
