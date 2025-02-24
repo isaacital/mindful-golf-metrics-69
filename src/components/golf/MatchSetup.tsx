@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { parseMatchInput, calculateNassauResults } from "@/utils/matchCalculations";
 import { toast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
 
 interface MatchSetupProps {
   teamScores: {
@@ -98,59 +99,101 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   };
 
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle>Match Setup</CardTitle>
+    <Card className="mt-4 bg-white/50 backdrop-blur-sm shadow-lg">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-xl font-semibold">Match Setup</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 mb-6">
           <Input
             placeholder="Enter match details (e.g., '$10 Nassau with $5 skins, birdies $2')"
             value={matchInput}
             onChange={(e) => setMatchInput(e.target.value)}
-            className="flex-1"
+            className="flex-1 bg-white/80"
           />
-          <Button onClick={handleMatchSetup}>Set Match</Button>
+          <Button onClick={handleMatchSetup} className="whitespace-nowrap">Set Match</Button>
         </div>
 
         {matchResult && (
-          <div className="mt-4">
-            <h3 className="font-bold mb-2">Match Details:</h3>
-            <p>{matchResult.description}</p>
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4 divide-y divide-gray-100"
+          >
+            <div className="pb-2">
+              <p className="text-sm text-muted-foreground">{matchResult.description}</p>
+            </div>
+
             {matchResult.details?.nassau && (
-              <div className="mt-2">
-                <h4 className="font-semibold">Nassau Results:</h4>
-                <p>Front 9: {matchResult.details.nassau.front9.winner} (${matchResult.details.nassau.front9.amount})</p>
-                <p>Back 9: {matchResult.details.nassau.back9.winner} (${matchResult.details.nassau.back9.amount})</p>
-                <p>Total: {matchResult.details.nassau.total.winner} (${matchResult.details.nassau.total.amount})</p>
+              <div className="pt-4 space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-3 bg-white/80 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Front 9</div>
+                    <div className="font-medium">{matchResult.details.nassau.front9.winner}</div>
+                    <div className="text-sm font-semibold text-green-600">${matchResult.details.nassau.front9.amount}</div>
+                  </div>
+                  <div className="p-3 bg-white/80 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Back 9</div>
+                    <div className="font-medium">{matchResult.details.nassau.back9.winner}</div>
+                    <div className="text-sm font-semibold text-green-600">${matchResult.details.nassau.back9.amount}</div>
+                  </div>
+                  <div className="p-3 bg-white/80 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Total</div>
+                    <div className="font-medium">{matchResult.details.nassau.total.winner}</div>
+                    <div className="text-sm font-semibold text-green-600">${matchResult.details.nassau.total.amount}</div>
+                  </div>
+                </div>
                 
-                <div className="mt-2 space-y-2">
-                  <h4 className="font-semibold">Payment Details:</h4>
-                  {matchResult.details.nassau.payments.map((payment: any, index: number) => (
-                    <div key={index} className="text-sm">
-                      <span className="text-red-500">{payment.from}</span> owes{' '}
-                      <span className="text-green-600">{payment.to}</span>{' '}
-                      ${payment.amount} ({payment.reason})
-                    </div>
-                  ))}
+                <div className="pt-2">
+                  <h4 className="text-sm font-medium mb-2">Payment Summary</h4>
+                  <div className="space-y-2">
+                    {matchResult.details.nassau.payments.map((payment: any, index: number) => (
+                      <div key={index} className="text-sm p-2 bg-white/80 rounded-lg flex items-center justify-between">
+                        <div>
+                          <span className="text-red-500 font-medium">{payment.from}</span>
+                          <span className="mx-1">→</span>
+                          <span className="text-green-600 font-medium">{payment.to}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold">${payment.amount}</div>
+                          <div className="text-xs text-muted-foreground">{payment.reason}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
-            {matchResult.amounts.skins && (
-              <div className="mt-2">
-                <h4 className="font-semibold">Skins:</h4>
-                <p>${matchResult.amounts.skins} per skin</p>
+
+            <div className="pt-4 space-y-2">
+              {matchResult.amounts.skins && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Skins</span>
+                  <span className="text-sm">${matchResult.amounts.skins} per skin</span>
+                </div>
+              )}
+              {(matchResult.amounts.birdies || matchResult.amounts.eagles) && (
+                <>
+                  {matchResult.amounts.birdies && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Birdies</span>
+                      <span className="text-sm">${matchResult.amounts.birdies} each</span>
+                    </div>
+                  )}
+                  {matchResult.amounts.eagles && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Eagles</span>
+                      <span className="text-sm">${matchResult.amounts.eagles} each</span>
+                    </div>
+                  )}
+                </>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t">
+                <span className="font-medium">Maximum Potential Payout</span>
+                <span className="font-semibold text-green-600">${matchResult.totalPayout}</span>
               </div>
-            )}
-            {(matchResult.amounts.birdies || matchResult.amounts.eagles) && (
-              <div className="mt-2">
-                <h4 className="font-semibold">Bonus Payouts:</h4>
-                {matchResult.amounts.birdies && <p>Birdies: ${matchResult.amounts.birdies} each</p>}
-                {matchResult.amounts.eagles && <p>Eagles: ${matchResult.amounts.eagles} each</p>}
-              </div>
-            )}
-            <p className="font-bold mt-2">Maximum Potential Payout: ${matchResult.totalPayout}</p>
-          </div>
+            </div>
+          </motion.div>
         )}
       </CardContent>
     </Card>
