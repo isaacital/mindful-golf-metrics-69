@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -6,23 +5,6 @@ import { CourseSelector } from "@/components/golf/CourseSelector";
 import { AddPlayerForm } from "@/components/golf/AddPlayerForm";
 import { ScoreCard } from "@/components/golf/ScoreCard";
 import { MatchSetup } from "@/components/golf/MatchSetup";
-
-const sampleCourses = [
-  {
-    id: 1,
-    name: "Pine Valley Golf Club",
-    holes: Array(18).fill(null).map((_, i) => ({
-      number: i + 1,
-      par: 4,
-      handicap: i + 1,
-    })),
-    tees: [
-      { color: "Blue", rating: 74.2, slope: 145 },
-      { color: "White", rating: 72.1, slope: 138 },
-      { color: "Red", rating: 69.8, slope: 132 },
-    ],
-  },
-];
 
 interface Player {
   id: string;
@@ -75,19 +57,19 @@ const samplePlayers: Player[] = [
 
 const Index = () => {
   const [players, setPlayers] = useState<Player[]>(samplePlayers);
-  const [selectedCourse, setSelectedCourse] = useState(sampleCourses[0]);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerHandicap, setNewPlayerHandicap] = useState("");
-  const [newPlayerTee, setNewPlayerTee] = useState(selectedCourse.tees[0].color);
+  const [newPlayerTee, setNewPlayerTee] = useState("");
 
   const calculateCourseHandicap = (handicapIndex: number, tee: string) => {
-    const selectedTee = selectedCourse.tees.find(t => t.color === tee);
+    const selectedTee = selectedCourse?.tees?.find(t => t.color === tee);
     if (!selectedTee) return 0;
     return Math.round(handicapIndex * (selectedTee.slope / 113) + (selectedTee.rating - 72));
   };
 
   const addPlayer = () => {
-    if (newPlayerName && newPlayerHandicap) {
+    if (newPlayerName && newPlayerHandicap && selectedCourse) {
       const courseHandicap = calculateCourseHandicap(parseFloat(newPlayerHandicap), newPlayerTee);
       const newPlayer: Player = {
         id: Date.now().toString(),
@@ -157,37 +139,41 @@ const Index = () => {
           className="space-y-6"
         >
           <CourseSelector
-            courses={sampleCourses}
+            courses={[]}
             selectedCourse={selectedCourse}
             onCourseChange={setSelectedCourse}
           />
 
-          <AddPlayerForm
-            tees={selectedCourse.tees}
-            newPlayerName={newPlayerName}
-            newPlayerHandicap={newPlayerHandicap}
-            newPlayerTee={newPlayerTee}
-            onNameChange={setNewPlayerName}
-            onHandicapChange={setNewPlayerHandicap}
-            onTeeChange={setNewPlayerTee}
-            onAddPlayer={addPlayer}
-          />
-
-          <div className="overflow-auto">
-            <div className="min-w-[1200px]">
-              <ScoreCard
-                players={players}
-                holes={selectedCourse.holes}
-                onUpdateScore={updateScore}
-                onUpdateTeam={updateTeam}
+          {selectedCourse && (
+            <>
+              <AddPlayerForm
+                tees={selectedCourse.tees}
+                newPlayerName={newPlayerName}
+                newPlayerHandicap={newPlayerHandicap}
+                newPlayerTee={newPlayerTee || (selectedCourse.tees[0]?.color ?? '')}
+                onNameChange={setNewPlayerName}
+                onHandicapChange={setNewPlayerHandicap}
+                onTeeChange={setNewPlayerTee}
+                onAddPlayer={addPlayer}
               />
-            </div>
-          </div>
 
-          <MatchSetup 
-            teamScores={calculateTeamScores(players)}
-            players={players.map(p => ({ name: p.name, team: p.team }))}
-          />
+              <div className="overflow-auto">
+                <div className="min-w-[1200px]">
+                  <ScoreCard
+                    players={players}
+                    holes={selectedCourse.holes}
+                    onUpdateScore={updateScore}
+                    onUpdateTeam={updateTeam}
+                  />
+                </div>
+              </div>
+
+              <MatchSetup 
+                teamScores={calculateTeamScores(players)}
+                players={players.map(p => ({ name: p.name, team: p.team }))}
+              />
+            </>
+          )}
         </motion.div>
       </div>
     </div>
