@@ -57,10 +57,21 @@ export default function CourseManagement() {
     setLoading(true);
 
     try {
-      // Insert course
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("No user found");
+      }
+
+      // Insert course with created_by field
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
-        .insert([{ name: courseName }])
+        .insert([{ 
+          name: courseName,
+          created_by: user.id
+        }])
         .select()
         .single();
 
