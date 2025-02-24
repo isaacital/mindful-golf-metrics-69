@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,13 @@ interface Player {
   team: string;
   courseHandicap: number;
   scores: (number | null)[];
+}
+
+interface TeamScores {
+  [team: string]: {
+    gross: number;
+    net: number;
+  };
 }
 
 interface Hole {
@@ -69,7 +75,7 @@ export const ScoreCard = ({
   if (players.length === 0) return null;
 
   const totalPar = holes.reduce((sum, hole) => sum + hole.par, 0);
-  const teamScores = calculateTeamScores(players);
+  const teamScores: TeamScores = calculateTeamScores(players);
 
   const existingTeams = Array.from(new Set(players.map(p => p.team))).sort();
   const nextTeam = String.fromCharCode(

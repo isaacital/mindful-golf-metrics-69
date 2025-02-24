@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -14,9 +13,16 @@ interface Player {
   name: string;
   handicapIndex: number;
   tee: string;
-  team: string;  // Changed from 'A' | 'B' to string
+  team: string;
   courseHandicap: number;
   scores: (number | null)[];
+}
+
+interface TeamScores {
+  [team: string]: {
+    gross: number;
+    net: number;
+  };
 }
 
 const samplePlayers: Player[] = [
@@ -79,7 +85,7 @@ const Index = () => {
         name: newPlayerName,
         handicapIndex: parseFloat(newPlayerHandicap),
         tee: newPlayerTee,
-        team: 'A', // Default team
+        team: 'A',
         courseHandicap,
         scores: Array(18).fill(null),
       };
@@ -128,8 +134,8 @@ const Index = () => {
     }));
   };
 
-  const calculateTeamScores = (players: Player[]): { [team: string]: { gross: number; net: number } } => {
-    const scores: { [team: string]: { gross: number; net: number } } = {};
+  const calculateTeamScores = (players: Player[]): TeamScores => {
+    const scores: TeamScores = {};
     
     players.forEach(player => {
       if (!scores[player.team]) {
