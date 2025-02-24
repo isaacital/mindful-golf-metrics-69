@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
   parseMatchInput, 
@@ -17,6 +16,7 @@ import { SkinsResults } from "./match-results/SkinsResults";
 import { BirdieResults } from "./match-results/BirdieResults";
 import { EagleResults } from "./match-results/EagleResults";
 import { PaymentSummary } from "./match-results/PaymentSummary";
+import { MatchResult } from "@/utils/match/types";
 
 interface MatchSetupProps {
   teamScores: {
@@ -27,8 +27,7 @@ interface MatchSetupProps {
 }
 
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
-  const [matchInput, setMatchInput] = useState("");
-  const [matchResult, setMatchResult] = useState<any>(null);
+  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [holeScores, setHoleScores] = useState<{ [key: number]: { [key: string]: number } }>({});
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
@@ -94,27 +93,8 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }));
   };
 
-  const handleMatchSetup = () => {
-    if (!matchInput.trim()) {
-      toast({
-        title: "Empty Input",
-        description: "Please enter match details",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const result = parseMatchInput(matchInput);
-    
-    if (!result) {
-      toast({
-        title: "No Valid Bets Found",
-        description: "Could not detect any valid bet amounts in your input. Try something like '5 Nassau' or '5/5/10'",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleMatchSetup = (result: MatchResult) => {
+    setMatchResult(result);
     let details: any = {};
     let allPayments: any[] = [];
     let newHoleScores: { [key: number]: { [key: string]: number } } = {};
@@ -136,7 +116,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       );
 
       details.nassau = nassauResults;
-      allPayments.push(...nassauResults.payments);
+      if (nassauResults.payments) {
+        allPayments.push(...nassauResults.payments);
+      }
     }
 
     if (result.amounts.skins) {
@@ -207,12 +189,6 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
 
     details.consolidatedPayments = consolidatePayments(allPayments);
     setHoleScores(newHoleScores);
-    setMatchResult({ ...result, details });
-
-    toast({
-      title: "Match Setup",
-      description: "Match details have been set successfully",
-    });
   };
 
   return (
@@ -222,19 +198,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <MatchSetupChat onMatchSetup={setMatchInput} />
-          
-          <div className="flex space-x-4">
-            <Input
-              placeholder="Match details will appear here..."
-              value={matchInput}
-              onChange={(e) => setMatchInput(e.target.value)}
-              className="flex-1 bg-white/80"
-            />
-            <Button onClick={handleMatchSetup} className="whitespace-nowrap">
-              Set Match
-            </Button>
-          </div>
+          <MatchSetupChat onMatchSetup={handleMatchSetup} />
 
           {matchResult && (
             <motion.div 
