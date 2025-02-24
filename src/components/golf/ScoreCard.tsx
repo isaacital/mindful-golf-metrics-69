@@ -1,7 +1,11 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { 
   calculateHoleScores, 
   formatScoreToPar, 
@@ -25,14 +29,31 @@ interface Hole {
   handicap: number;
 }
 
+interface Tee {
+  color: string;
+  rating: number;
+  slope: number;
+}
+
 interface ScoreCardProps {
   players: Player[];
   holes: Hole[];
+  tees: Tee[];
   onUpdateScore: (playerId: string, holeNumber: number, score: number) => void;
   onUpdateTeam: (playerId: string, team: 'A' | 'B') => void;
+  onUpdateTee: (playerId: string, tee: string) => void;
+  onRemovePlayer: (playerId: string) => void;
 }
 
-export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: ScoreCardProps) => {
+export const ScoreCard = ({ 
+  players, 
+  holes, 
+  tees,
+  onUpdateScore, 
+  onUpdateTeam,
+  onUpdateTee,
+  onRemovePlayer 
+}: ScoreCardProps) => {
   if (players.length === 0) return null;
 
   const totalPar = holes.reduce((sum, hole) => sum + hole.par, 0);
@@ -50,6 +71,7 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
               <tr className="border-b">
                 <th className="py-2 px-2 text-left w-[180px]">Player</th>
                 <th className="py-2 px-2 text-left w-[80px]">Team</th>
+                <th className="py-2 px-2 text-left w-[120px]">Tee</th>
                 {holes.map((hole) => (
                   <th key={hole.number} className="py-2 px-1 text-center w-[45px]">
                     {hole.number}
@@ -59,10 +81,12 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                 <th className="py-2 px-1 text-center w-[45px]">In</th>
                 <th className="py-2 px-1 text-center w-[60px]">Total</th>
                 <th className="py-2 px-1 text-center w-[60px]">Net</th>
+                <th className="py-2 px-1 text-center w-[60px]">Actions</th>
               </tr>
               <tr className="border-b">
                 <th className="py-2 px-2 text-left"></th>
                 <th className="py-2 px-2 text-left">HCP</th>
+                <th className="py-2 px-2 text-left"></th>
                 {holes.map((hole) => (
                   <th key={`handicap-${hole.number}`} className="py-2 px-1 text-center text-xs text-muted-foreground">
                     {hole.handicap}
@@ -72,10 +96,12 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                 <th className="py-2 px-1 text-center">-</th>
                 <th className="py-2 px-1 text-center">-</th>
                 <th className="py-2 px-1 text-center">-</th>
+                <th className="py-2 px-1 text-center">-</th>
               </tr>
               <tr className="border-b">
                 <th className="py-2 px-2 text-left"></th>
                 <th className="py-2 px-2 text-left">Par</th>
+                <th className="py-2 px-2 text-left"></th>
                 {holes.map((hole) => (
                   <th key={`par-${hole.number}`} className="py-2 px-1 text-center text-xs text-muted-foreground">
                     {hole.par}
@@ -91,6 +117,7 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                   {totalPar}
                 </th>
                 <th className="py-2 px-1 text-center text-xs text-muted-foreground">-</th>
+                <th className="py-2 px-1 text-center">-</th>
               </tr>
             </thead>
             <tbody>
@@ -105,7 +132,7 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                     <td className="py-2 px-2">
                       <div className="text-sm font-medium truncate">{player.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        ({player.handicapIndex}) - {player.tee}
+                        ({player.handicapIndex})
                         <br />
                         Course Handicap: {player.courseHandicap}
                       </div>
@@ -125,6 +152,20 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                           <Label htmlFor={`team-b-${player.id}`} className="text-xs">B</Label>
                         </div>
                       </RadioGroup>
+                    </td>
+                    <td className="py-2 px-2">
+                      <Select value={player.tee} onValueChange={(tee) => onUpdateTee(player.id, tee)}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Select tee" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tees.map(tee => (
+                            <SelectItem key={tee.color} value={tee.color}>
+                              {tee.color} ({tee.rating}/{tee.slope})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </td>
                     {player.scores.map((score, index) => (
                       <td key={index} className="py-1 px-0.5">
@@ -146,18 +187,28 @@ export const ScoreCard = ({ players, holes, onUpdateScore, onUpdateTeam }: Score
                     <td className="py-1 px-0.5 text-center font-medium text-sm">
                       {netScore} <span className={getScoreColor(netScoreToPar)}>({netScoreToPar})</span>
                     </td>
+                    <td className="py-1 px-0.5 text-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onRemovePlayer(player.id)}
+                        className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
                   </tr>
                 );
               })}
               <tr className="border-t-2 border-gray-300 bg-gray-50">
-                <td colSpan={2} className="py-3 px-2 font-bold">Team A Total</td>
-                <td colSpan={19} className="py-3 px-2 text-right font-bold">
+                <td colSpan={3} className="py-3 px-2 font-bold">Team A Total</td>
+                <td colSpan={20} className="py-3 px-2 text-right font-bold">
                   Gross: {teamScores.A.gross} | Net: {teamScores.A.net}
                 </td>
               </tr>
               <tr className="border-t border-gray-300 bg-gray-50">
-                <td colSpan={2} className="py-3 px-2 font-bold">Team B Total</td>
-                <td colSpan={19} className="py-3 px-2 text-right font-bold">
+                <td colSpan={3} className="py-3 px-2 font-bold">Team B Total</td>
+                <td colSpan={20} className="py-3 px-2 text-right font-bold">
                   Gross: {teamScores.B.gross} | Net: {teamScores.B.net}
                 </td>
               </tr>

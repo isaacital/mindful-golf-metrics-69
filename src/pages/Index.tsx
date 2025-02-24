@@ -7,6 +7,7 @@ import { AddPlayerForm } from "@/components/golf/AddPlayerForm";
 import { ScoreCard } from "@/components/golf/ScoreCard";
 import { MatchSetup } from "@/components/golf/MatchSetup";
 import { PlayerManagement } from "@/components/golf/PlayerManagement";
+import { toast } from "sonner";
 
 interface Player {
   id: string;
@@ -85,6 +86,15 @@ const Index = () => {
       setPlayers([...players, newPlayer]);
       setNewPlayerName("");
       setNewPlayerHandicap("");
+      toast.success(`${newPlayerName} added to the match`);
+    }
+  };
+
+  const removePlayer = (playerId: string) => {
+    const player = players.find(p => p.id === playerId);
+    if (player) {
+      setPlayers(players.filter(p => p.id !== playerId));
+      toast.success(`${player.name} removed from the match`);
     }
   };
 
@@ -103,6 +113,16 @@ const Index = () => {
     setPlayers(players.map(player => {
       if (player.id === playerId) {
         return { ...player, team };
+      }
+      return player;
+    }));
+  };
+
+  const updatePlayerTee = (playerId: string, tee: string) => {
+    setPlayers(players.map(player => {
+      if (player.id === playerId) {
+        const courseHandicap = calculateCourseHandicap(player.handicapIndex, tee);
+        return { ...player, tee, courseHandicap };
       }
       return player;
     }));
@@ -168,6 +188,9 @@ const Index = () => {
                     holes={selectedCourse.holes}
                     onUpdateScore={updateScore}
                     onUpdateTeam={updateTeam}
+                    onUpdateTee={updatePlayerTee}
+                    onRemovePlayer={removePlayer}
+                    tees={selectedCourse.tees}
                   />
                 </div>
               </div>
