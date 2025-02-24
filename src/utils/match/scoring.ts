@@ -1,8 +1,13 @@
 
 import { PaymentDetail, Player } from './types';
 
-interface ScoringResult {
-  achievements: Array<{ hole: number; player: string; amount: number }>;
+interface BirdieResult {
+  birdies: Array<{ hole: number; player: string; amount: number }>;
+  payments: PaymentDetail[];
+}
+
+interface EagleResult {
+  eagles: Array<{ hole: number; player: string; amount: number }>;
   payments: PaymentDetail[];
 }
 
@@ -11,9 +16,9 @@ export const calculateBirdieResults = (
   pars: number[],
   amount: number,
   players: Player[]
-): ScoringResult => {
+): BirdieResult => {
   const results = {
-    achievements: [] as Array<{ hole: number; player: string; amount: number }>,
+    birdies: [] as Array<{ hole: number; player: string; amount: number }>,
     payments: [] as PaymentDetail[]
   };
 
@@ -21,7 +26,7 @@ export const calculateBirdieResults = (
     playerScores.forEach((score, holeIndex) => {
       if (score < pars[holeIndex]) {
         const birdieAmount = amount * (players.length - 1);
-        results.achievements.push({
+        results.birdies.push({
           hole: holeIndex + 1,
           player: players[playerIndex].name,
           amount: birdieAmount
@@ -50,9 +55,9 @@ export const calculateEagleResults = (
   pars: number[],
   amount: number,
   players: Player[]
-): ScoringResult => {
+): EagleResult => {
   const results = {
-    achievements: [] as Array<{ hole: number; player: string; amount: number }>,
+    eagles: [] as Array<{ hole: number; player: string; amount: number }>,
     payments: [] as PaymentDetail[]
   };
 
@@ -60,7 +65,7 @@ export const calculateEagleResults = (
     playerScores.forEach((score, holeIndex) => {
       if (score <= pars[holeIndex] - 2) {
         const eagleAmount = amount * (players.length - 1);
-        results.achievements.push({
+        results.eagles.push({
           hole: holeIndex + 1,
           player: players[playerIndex].name,
           amount: eagleAmount
