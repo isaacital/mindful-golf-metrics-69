@@ -8,7 +8,6 @@ interface MatchResult {
   };
   winners: string[];
   losers: string[];
-  totalPayout: number;
   description: string;
   bets: string[];
 }
@@ -27,7 +26,6 @@ export const parseMatchInput = (input: string): MatchResult | null => {
     amounts: {},
     winners: [],
     losers: [],
-    totalPayout: 0,
     description: '',
     bets: []
   };
@@ -69,7 +67,6 @@ export const parseMatchInput = (input: string): MatchResult | null => {
   if (result.type.length === 0) return null;
 
   result.description = result.bets.join(' • ');
-  result.totalPayout = calculateTotalPotential(result.amounts);
 
   return result;
 };
@@ -209,6 +206,134 @@ export const calculateNassauResults = (
     (results.front9.amount || 0) + 
     (results.back9.amount || 0) + 
     (results.total.amount || 0);
+
+  return results;
+};
+
+export const calculateSkinsResults = (
+  scores: number[][],  // Array of arrays containing each player's scores for each hole
+  amount: number,
+  players: { name: string; team: 'A' | 'B' }[]
+) => {
+  const results = {
+    skins: [] as { hole: number; winner: string; amount: number }[],
+    payments: [] as PaymentDetail[]
+  };
+
+  scores[0].forEach((_, holeIndex) => {
+    let lowestScore = Infinity;
+    let lowestScorePlayers: string[] = [];
+
+    // Find lowest score for the hole
+    players.forEach((player, playerIndex) => {
+      const score = scores[playerIndex][holeIndex];
+      if (score < lowestScore) {
+        lowestScore = score;
+        lowestScorePlayers = [player.name];
+      } else if (score === lowestScore) {
+        lowestScorePlayers.push(player.name);
+      }
+    });
+
+    // If only one player has lowest score, they win the skin
+    if (lowestScorePlayers.length === 1) {
+      results.skins.push({
+        hole: holeIndex + 1,
+        winner: lowestScorePlayers[0],
+        amount: amount * (players.length - 1) // Each player pays the amount to the winner
+      });
+
+      // Add payment details
+      players.forEach(player => {
+        if (player.name !== lowestScorePlayers[0]) {
+          results.payments.push({
+            from: player.name,
+            to: lowestScorePlayers[0],
+            amount: amount,
+            reason: `Skin on hole ${holeIndex + 1}`
+          });
+        }
+      });
+    }
+  });
+
+  return results;
+};
+
+export const calculateBirdieResults = (
+  scores: number[][],
+  pars: number[],
+  amount: number,
+  players: { name: string; team: 'A' | 'B' }[]
+) => {
+  const results = {
+    birdies: [] as { hole: number; player: string; amount: number }[],
+    payments: [] as PaymentDetail[]
+  };
+
+  scores.forEach((playerScores, playerIndex) => {
+    playerScores.forEach((score, holeIndex) => {
+      if (score < pars[holeIndex]) {
+        const birdieAmount = amount * (players.length - 1);
+        results.birdies.push({
+          hole: holeIndex + 1,
+          player: players[playerIndex].name,
+          amount: birdieAmount
+        });
+
+        // Add payment details
+        players.forEach(player => {
+          if (player.name !== players[playerIndex].name) {
+            results.payments.push({
+              from: player.name,
+              to: players[playerIndex].name,
+              amount: amount,
+              reason: `Birdie on hole ${holeIndex + 1}`
+            });
+          }
+        });
+      }
+    });
+  });
+
+  return results;
+};
+
+export const calculateEagleResults = (
+  scores: number[][],
+  pars: number[],
+  amount: number,
+  players: { name: string; team: 'A' | 'B' }[]
+) => {
+  const results = {
+    eagles: [] as { hole: number; player: string; amount: number }[],
+    payments: [] as PaymentDetail[]
+  };
+
+  scores.forEach((playerScores, playerIndex) => {
+    playerScores.forEach((score, holeIndex) => {
+      if (score <= pars[holeIndex] - 2) {
+        const eagleAmount = amount * (players.length - 1);
+        results.eagles.push({
+          hole: holeIndex + 1,
+          player: players[playerIndex].name,
+          amount: eagleAmount
+        });
+
+        // Add payment details
+        players.forEach(player => {
+          if (player.name !== players[playerIndex].name) {
+            results.payments.push({
+              from: player.name,
+              to: players[playerIndex].name,
+              amount: amount,
+              reason: `Eagle on hole ${holeIndex + 1}`
+            });
+          }
+        });
+      }
+    });
+  });
 
   return results;
 };
