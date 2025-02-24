@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -94,8 +95,8 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   };
 
   const handleMatchSetup = (result: MatchResult) => {
-    setMatchResult(result);
-    let details: any = {};
+    let newResult = { ...result };
+    let details: MatchResult['details'] = {};
     let allPayments: any[] = [];
     let newHoleScores: { [key: number]: { [key: string]: number } } = {};
 
@@ -188,7 +189,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     details.consolidatedPayments = consolidatePayments(allPayments);
+    newResult.details = details;
     setHoleScores(newHoleScores);
+    setMatchResult(newResult);
   };
 
   return (
@@ -238,7 +241,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
                 <EagleResults eagles={matchResult.details.eagles.eagles} />
               )}
 
-              {matchResult.details.consolidatedPayments && (
+              {matchResult.details?.consolidatedPayments && (
                 <PaymentSummary payments={matchResult.details.consolidatedPayments} />
               )}
             </motion.div>
