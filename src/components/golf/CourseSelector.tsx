@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface Course {
   id: string;
@@ -20,6 +22,7 @@ interface CourseSelectorProps {
 export const CourseSelector = ({ selectedCourse, onCourseChange }: CourseSelectorProps) => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -71,11 +74,11 @@ export const CourseSelector = ({ selectedCourse, onCourseChange }: CourseSelecto
     fetchCourses();
   }, []);
 
-  if (loading || courses.length === 0) {
+  if (loading) {
     return (
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>{loading ? "Loading Courses..." : "No Courses Available"}</CardTitle>
+          <CardTitle>Loading Courses...</CardTitle>
         </CardHeader>
       </Card>
     );
@@ -83,28 +86,36 @@ export const CourseSelector = ({ selectedCourse, onCourseChange }: CourseSelecto
 
   return (
     <Card className="mb-8">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle>Select Course</CardTitle>
       </CardHeader>
       <CardContent>
-        <Select 
-          value={selectedCourse?.id} 
-          onValueChange={(value) => {
-            const course = courses.find(c => c.id === value);
-            if (course) onCourseChange(course);
-          }}
-        >
-          <SelectTrigger className="w-full md:w-[300px]">
-            <SelectValue placeholder="Select a course" />
-          </SelectTrigger>
-          <SelectContent>
-            {courses.map(course => (
-              <SelectItem key={course.id} value={course.id}>
-                {course.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-4 items-center">
+          <Select 
+            value={selectedCourse?.id} 
+            onValueChange={(value) => {
+              const course = courses.find(c => c.id === value);
+              if (course) onCourseChange(course);
+            }}
+          >
+            <SelectTrigger className="w-full md:w-[300px]">
+              <SelectValue placeholder="Select a course" />
+            </SelectTrigger>
+            <SelectContent>
+              {courses.map(course => (
+                <SelectItem key={course.id} value={course.id}>
+                  {course.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button 
+            variant="outline"
+            onClick={() => navigate('/course-management')}
+          >
+            Add Course
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
