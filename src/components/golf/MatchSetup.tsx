@@ -32,34 +32,64 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   const [matchResult, setMatchResult] = useState<any>(null);
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
-    const groupedByPayer = new Map<string, Array<{to: string; amount: number; reasons: string[]}>>();
+    const netAmounts = new Map<string, number>();
     
     payments.forEach(payment => {
-      if (!groupedByPayer.has(payment.from)) {
-        groupedByPayer.set(payment.from, []);
-      }
-      
-      const payerGroup = groupedByPayer.get(payment.from)!;
-      const existingPayee = payerGroup.find(p => p.to === payment.to);
-      
-      if (existingPayee) {
-        existingPayee.amount += payment.amount;
-        existingPayee.reasons.push(payment.reason);
-      } else {
-        payerGroup.push({
-          to: payment.to,
-          amount: payment.amount,
-          reasons: [payment.reason]
-        });
-      }
+      netAmounts.set(payment.from, (netAmounts.get(payment.from) || 0) - payment.amount);
+      netAmounts.set(payment.to, (netAmounts.get(payment.to) || 0) + payment.amount);
     });
 
-    return Array.from(groupedByPayer.entries()).map(([from, payees]) => ({
-      from,
-      payees: payees.map(p => ({
-        to: p.to,
-        amount: p.amount,
-        reason: p.reasons.join(', ')
+    const balances = Array.from(netAmounts.entries()).map(([player, amount]) => ({ player, amount }));
+    const creditors = balances.filter(b => b.amount > 0).sort((a, b) => b.amount - a.amount);
+    const debtors = balances.filter(b => b.amount < 0).sort((a, b) => a.amount - b.amount);
+
+    const optimizedPayments: Array<{from: string; payees: Array<{to: string; amount: number}>}> = [];
+    let creditorIndex = 0;
+    let debtorIndex = 0;
+
+    while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
+      const creditor = creditors[creditorIndex];
+      const debtor = debtors[debtorIndex];
+      
+      const amount = Math.min(creditor.amount, -debtor.amount);
+      
+      const existingDebtor = optimizedPayments.find(p => p.from === debtor.player);
+      if (existingDebtor) {
+        existingDebtor.payees.push({
+          to: creditor.player,
+          amount: amount
+        });
+      } else {
+        optimizedPayments.push({
+          from: debtor.player,
+          payees: [{
+            to: creditor.player,
+            amount: amount
+          }]
+        });
+      }
+
+      creditor.amount -= amount;
+      debtor.amount += amount;
+
+      if (Math.abs(creditor.amount) < 0.01) creditorIndex++;
+      if (Math.abs(debtor.amount) < 0.01) debtorIndex++;
+    }
+
+    const debtSummary = new Map<string, Set<string>>();
+    payments.forEach(payment => {
+      if (!debtSummary.has(payment.from)) {
+        debtSummary.set(payment.from, new Set());
+      }
+      debtSummary.get(payment.from)?.add(payment.reason);
+    });
+
+    return optimizedPayments.map(payment => ({
+      from: payment.from,
+      payees: payment.payees.map(payee => ({
+        to: payee.to,
+        amount: payee.amount,
+        reason: `Settlement for: ${Array.from(debtSummary.get(payment.from) || []).join(', ')}`
       }))
     }));
   };
