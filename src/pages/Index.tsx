@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -13,16 +14,9 @@ interface Player {
   name: string;
   handicapIndex: number;
   tee: string;
-  team: string;
+  team: 'A' | 'B';
   courseHandicap: number;
   scores: (number | null)[];
-}
-
-interface TeamScores {
-  [team: string]: {
-    gross: number;
-    net: number;
-  };
 }
 
 const samplePlayers: Player[] = [
@@ -85,7 +79,7 @@ const Index = () => {
         name: newPlayerName,
         handicapIndex: parseFloat(newPlayerHandicap),
         tee: newPlayerTee,
-        team: 'A',
+        team: players.length % 2 === 0 ? 'A' : 'B',
         courseHandicap,
         scores: Array(18).fill(null),
       };
@@ -115,7 +109,7 @@ const Index = () => {
     }));
   };
 
-  const updateTeam = (playerId: string, team: string) => {
+  const updateTeam = (playerId: string, team: 'A' | 'B') => {
     setPlayers(players.map(player => {
       if (player.id === playerId) {
         return { ...player, team };
@@ -134,19 +128,23 @@ const Index = () => {
     }));
   };
 
-  const calculateTeamScores = (players: Player[]): TeamScores => {
-    const scores: TeamScores = {};
-    
+  const calculateTeamScores = (players: Player[]): { A: { gross: number; net: number }; B: { gross: number; net: number } } => {
+    const scores = {
+      A: { gross: 0, net: 0 },
+      B: { gross: 0, net: 0 }
+    };
+
     players.forEach(player => {
-      if (!scores[player.team]) {
-        scores[player.team] = { gross: 0, net: 0 };
-      }
-      
       const totalScore = player.scores.reduce((sum, score) => sum + (score || 0), 0);
       const netScore = totalScore - player.courseHandicap;
       
-      scores[player.team].gross += totalScore;
-      scores[player.team].net += netScore;
+      if (player.team === 'A') {
+        scores.A.gross += totalScore;
+        scores.A.net += netScore;
+      } else {
+        scores.B.gross += totalScore;
+        scores.B.net += netScore;
+      }
     });
 
     return scores;
