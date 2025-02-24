@@ -14,7 +14,13 @@ serve(async (req) => {
 
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
   if (!openAIApiKey) {
-    throw new Error('OPENAI_API_KEY is not set')
+    return new Response(
+      JSON.stringify({ error: 'OpenAI API key not configured' }), 
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
   }
 
   try {
@@ -31,7 +37,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a golf match setup assistant. Your goal is to help players set up their golf match format and betting structure.
+            content: `You are a golf match setup assistant. Help players set up their golf match format and betting structure.
             When users describe their desired match format, analyze their input and convert it into a standardized format that includes:
             - Nassau bets (front 9, back 9, overall match)
             - Skins games
@@ -55,6 +61,7 @@ serve(async (req) => {
           ...messages
         ],
         temperature: 0.7,
+        max_tokens: 500
       }),
     })
 
@@ -67,6 +74,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
+    console.error('Error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

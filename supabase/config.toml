@@ -1,1 +1,5 @@
+
 project_id = "culogzxomnalpnctrcfx"
+
+[chat-match-setup]
+verify_jwt = false

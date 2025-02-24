@@ -30,7 +30,7 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
     setIsLoading(true);
 
     try {
-      const { data: response, error } = await supabase.functions.invoke('chat-match-setup', {
+      const { data, error } = await supabase.functions.invoke('chat-match-setup', {
         body: {
           messages: [
             ...messages,
@@ -39,9 +39,16 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw new Error(error.message);
+      }
 
-      const assistantMessage = response.choices[0].message;
+      if (!data?.choices?.[0]?.message) {
+        throw new Error("Invalid response format from AI");
+      }
+
+      const assistantMessage = data.choices[0].message;
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: assistantMessage.content 
@@ -71,8 +78,8 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
         // Not JSON format, continue conversation
       }
     } catch (error) {
-      toast.error("Error connecting to AI assistant");
-      console.error("Error:", error);
+      console.error("Error details:", error);
+      toast.error("Error: Unable to connect to the AI assistant. Please try again.");
     } finally {
       setIsLoading(false);
     }
