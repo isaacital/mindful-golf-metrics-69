@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,28 +32,35 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   const [matchResult, setMatchResult] = useState<any>(null);
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
-    const consolidated = new Map<string, ConsolidatedPayment>();
+    const groupedByPayer = new Map<string, Array<{to: string; amount: number; reasons: string[]}>>();
     
     payments.forEach(payment => {
-      const key = `${payment.from}->${payment.to}`;
-      if (!consolidated.has(key)) {
-        consolidated.set(key, {
-          amount: 0,
-          reasons: [],
-          from: payment.from,
-          to: payment.to
+      if (!groupedByPayer.has(payment.from)) {
+        groupedByPayer.set(payment.from, []);
+      }
+      
+      const payerGroup = groupedByPayer.get(payment.from)!;
+      const existingPayee = payerGroup.find(p => p.to === payment.to);
+      
+      if (existingPayee) {
+        existingPayee.amount += payment.amount;
+        existingPayee.reasons.push(payment.reason);
+      } else {
+        payerGroup.push({
+          to: payment.to,
+          amount: payment.amount,
+          reasons: [payment.reason]
         });
       }
-      const current = consolidated.get(key)!;
-      current.amount += payment.amount;
-      current.reasons.push(payment.reason);
     });
 
-    return Array.from(consolidated.values()).map(({ amount, reasons, from, to }) => ({
+    return Array.from(groupedByPayer.entries()).map(([from, payees]) => ({
       from,
-      to,
-      amount,
-      reason: reasons.join(', ')
+      payees: payees.map(p => ({
+        to: p.to,
+        amount: p.amount,
+        reason: p.reasons.join(', ')
+      }))
     }));
   };
 
@@ -94,17 +100,15 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     if (result.amounts.skins) {
-      // More realistic mock scores with some variations
       const mockScores = players.map((_, playerIndex) => 
         Array(18).fill(0).map((_, holeIndex) => {
-          // Create some variation in scores (between 3 and 6)
           if (playerIndex === 0 && (holeIndex === 3 || holeIndex === 12)) {
-            return 3; // Some exceptional scores for first player
+            return 3;
           }
           if (playerIndex === 1 && holeIndex === 7) {
-            return 3; // Good score for second player
+            return 3;
           }
-          return 4 + Math.floor(Math.random() * 3); // Random scores between 4 and 6
+          return 4 + Math.floor(Math.random() * 3);
         })
       );
       
@@ -116,14 +120,13 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     if (result.amounts.birdies) {
-      // Mock scores with some birdies
       const mockScores = players.map((_, playerIndex) => 
         Array(18).fill(0).map((_, holeIndex) => {
           if (playerIndex === 0 && (holeIndex === 2 || holeIndex === 11)) {
-            return 3; // Birdies for first player
+            return 3;
           }
           if (playerIndex === 1 && holeIndex === 8) {
-            return 3; // Birdie for second player
+            return 3;
           }
           return 4;
         })
@@ -137,11 +140,10 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     if (result.amounts.eagles) {
-      // Mock scores with an eagle
       const mockScores = players.map((_, playerIndex) => 
         Array(18).fill(0).map((_, holeIndex) => {
           if (playerIndex === 0 && holeIndex === 5) {
-            return 2; // Eagle for first player on par 4
+            return 2;
           }
           return 4;
         })
@@ -154,7 +156,6 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       }
     }
 
-    // Consolidate all payments
     details.consolidatedPayments = consolidatePayments(allPayments);
 
     setMatchResult({ ...result, details });
@@ -267,17 +268,22 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
 
             <div className="pt-4">
               <h4 className="text-sm font-medium mb-2">Final Payment Summary</h4>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {matchResult.details.consolidatedPayments?.map((payment: any, index: number) => (
-                  <div key={index} className="text-sm p-2 bg-white/80 rounded-lg flex items-center justify-between">
-                    <div>
-                      <span className="text-red-500 font-medium">{payment.from}</span>
-                      <span className="mx-1">→</span>
-                      <span className="text-green-600 font-medium">{payment.to}</span>
+                  <div key={index} className="p-3 bg-white/80 rounded-lg">
+                    <div className="text-sm font-medium text-red-500 mb-2">
+                      {payment.from} owes:
                     </div>
-                    <div className="text-right">
-                      <div className="font-semibold">${payment.amount}</div>
-                      <div className="text-xs text-muted-foreground">{payment.reason}</div>
+                    <div className="space-y-2 pl-4">
+                      {payment.payees.map((payee: any, pIndex: number) => (
+                        <div key={pIndex} className="text-sm flex items-center justify-between">
+                          <div>
+                            <span className="text-green-600 font-medium">{payee.to}</span>
+                            <span className="text-xs text-muted-foreground ml-2">({payee.reason})</span>
+                          </div>
+                          <div className="font-semibold">${payee.amount}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
