@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -5,6 +6,7 @@ import { CourseSelector } from "@/components/golf/CourseSelector";
 import { AddPlayerForm } from "@/components/golf/AddPlayerForm";
 import { ScoreCard } from "@/components/golf/ScoreCard";
 import { MatchSetup } from "@/components/golf/MatchSetup";
+import { PlayerManagement } from "@/components/golf/PlayerManagement";
 
 interface Player {
   id: string;
@@ -138,6 +140,8 @@ const Index = () => {
           transition={{ duration: 0.6 }}
           className="space-y-6"
         >
+          <PlayerManagement />
+          
           <CourseSelector
             courses={[]}
             selectedCourse={selectedCourse}
