@@ -46,7 +46,7 @@ export const AddPlayerForm = ({
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data: savedPlayers } = useQuery({
+  const { data: savedPlayers, refetch } = useQuery({
     queryKey: ['players'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -77,9 +77,29 @@ export const AddPlayerForm = ({
   };
 
   const handleAddNewPlayer = async (name: string, handicap: string) => {
-    onNameChange(name);
-    onHandicapChange(handicap);
-    setSelectedPlayerId("");
+    try {
+      const { data, error } = await supabase
+        .from('players')
+        .insert([{ 
+          name, 
+          handicap_index: handicap ? parseFloat(handicap) : null 
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success('Player added successfully');
+      refetch(); // Refresh the players list
+      
+      // Set the new player as the selected player
+      onNameChange(data.name);
+      onHandicapChange(data.handicap_index?.toString() ?? "");
+      setSelectedPlayerId(data.id);
+    } catch (error) {
+      console.error('Error adding player:', error);
+      toast.error('Failed to add player');
+    }
   };
 
   return (

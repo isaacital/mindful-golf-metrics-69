@@ -1,5 +1,5 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,9 @@ export const AddNewPlayerDialog = ({ open, onOpenChange, onAddPlayer }: AddNewPl
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Player</DialogTitle>
+          <DialogDescription>
+            Add a new player to your database. They will be automatically added to the match.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
