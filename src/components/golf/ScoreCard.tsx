@@ -28,7 +28,7 @@ interface Player {
   name: string;
   handicapIndex: number;
   tee: string;
-  team: 'A' | 'B';
+  team: string;
   courseHandicap: number;
   scores: (number | null)[];
 }
@@ -50,7 +50,7 @@ interface ScoreCardProps {
   holes: Hole[];
   tees: Tee[];
   onUpdateScore: (playerId: string, holeNumber: number, score: number) => void;
-  onUpdateTeam: (playerId: string, team: 'A' | 'B') => void;
+  onUpdateTeam: (playerId: string, team: string) => void;
   onUpdateTee: (playerId: string, tee: string) => void;
   onRemovePlayer: (playerId: string) => void;
 }
@@ -70,6 +70,14 @@ export const ScoreCard = ({
 
   const totalPar = holes.reduce((sum, hole) => sum + hole.par, 0);
   const teamScores = calculateTeamScores(players);
+
+  const existingTeams = Array.from(new Set(players.map(p => p.team))).sort();
+  const nextTeam = String.fromCharCode(
+    Math.max(
+      ...existingTeams.map(t => t.charCodeAt(0)),
+      'A'.charCodeAt(0) - 1
+    ) + 1
+  );
 
   const handleDelete = (player: Player) => {
     setPlayerToDelete(player);
@@ -171,32 +179,17 @@ export const ScoreCard = ({
                       </div>
                     </td>
                     <td className="py-2 px-2">
-                      <RadioGroup
-                        value={player.team}
-                        onValueChange={(value: 'A' | 'B') => onUpdateTeam(player.id, value)}
-                        className="flex flex-row gap-1"
-                      >
-                        <div className="flex items-center gap-0.5">
-                          <RadioGroupItem value="A" id={`team-a-${player.id}`} className="h-3 w-3" />
-                          <Label htmlFor={`team-a-${player.id}`} className="text-xs">A</Label>
-                        </div>
-                        <div className="flex items-center gap-0.5">
-                          <RadioGroupItem value="B" id={`team-b-${player.id}`} className="h-3 w-3" />
-                          <Label htmlFor={`team-b-${player.id}`} className="text-xs">B</Label>
-                        </div>
-                      </RadioGroup>
-                    </td>
-                    <td className="py-2 px-2">
-                      <Select value={player.tee} onValueChange={(tee) => onUpdateTee(player.id, tee)}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Select tee" />
+                      <Select value={player.team} onValueChange={(team) => onUpdateTeam(player.id, team)}>
+                        <SelectTrigger className="h-8 w-20 text-xs">
+                          <SelectValue placeholder="Team" />
                         </SelectTrigger>
                         <SelectContent>
-                          {tees.map(tee => (
-                            <SelectItem key={tee.color} value={tee.color}>
-                              {tee.color} ({tee.rating}/{tee.slope})
+                          {existingTeams.map(team => (
+                            <SelectItem key={team} value={team}>
+                              Team {team}
                             </SelectItem>
                           ))}
+                          <SelectItem value={nextTeam}>Team {nextTeam}</SelectItem>
                         </SelectContent>
                       </Select>
                     </td>
@@ -223,18 +216,14 @@ export const ScoreCard = ({
                   </tr>
                 );
               })}
-              <tr className="border-t-2 border-gray-300 bg-gray-50">
-                <td colSpan={3} className="py-3 px-2 font-bold">Team A Total</td>
-                <td colSpan={20} className="py-3 px-2 text-right font-bold">
-                  Gross: {teamScores.A.gross} | Net: {teamScores.A.net}
-                </td>
-              </tr>
-              <tr className="border-t border-gray-300 bg-gray-50">
-                <td colSpan={3} className="py-3 px-2 font-bold">Team B Total</td>
-                <td colSpan={20} className="py-3 px-2 text-right font-bold">
-                  Gross: {teamScores.B.gross} | Net: {teamScores.B.net}
-                </td>
-              </tr>
+              {Object.entries(teamScores).map(([team, scores], index) => (
+                <tr key={team} className={index === 0 ? "border-t-2 border-gray-300 bg-gray-50" : "border-t border-gray-300 bg-gray-50"}>
+                  <td colSpan={3} className="py-3 px-2 font-bold">Team {team} Total</td>
+                  <td colSpan={20} className="py-3 px-2 text-right font-bold">
+                    Gross: {scores.gross} | Net: {scores.net}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

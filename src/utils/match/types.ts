@@ -22,7 +22,7 @@ export interface PaymentDetail {
 
 export interface Player {
   name: string;
-  team: 'A' | 'B';
+  team: string;  // Changed from 'A' | 'B' to string to support multiple teams
 }
 
 export interface TeamScores {

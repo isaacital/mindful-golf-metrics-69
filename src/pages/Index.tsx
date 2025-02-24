@@ -14,7 +14,7 @@ interface Player {
   name: string;
   handicapIndex: number;
   tee: string;
-  team: 'A' | 'B';
+  team: string;  // Changed from 'A' | 'B' to string
   courseHandicap: number;
   scores: (number | null)[];
 }
@@ -79,7 +79,7 @@ const Index = () => {
         name: newPlayerName,
         handicapIndex: parseFloat(newPlayerHandicap),
         tee: newPlayerTee,
-        team: players.length % 2 === 0 ? 'A' : 'B',
+        team: 'A', // Default team
         courseHandicap,
         scores: Array(18).fill(null),
       };
@@ -109,7 +109,7 @@ const Index = () => {
     }));
   };
 
-  const updateTeam = (playerId: string, team: 'A' | 'B') => {
+  const updateTeam = (playerId: string, team: string) => {
     setPlayers(players.map(player => {
       if (player.id === playerId) {
         return { ...player, team };
@@ -128,23 +128,19 @@ const Index = () => {
     }));
   };
 
-  const calculateTeamScores = (players: Player[]): { A: { gross: number; net: number }; B: { gross: number; net: number } } => {
-    const scores = {
-      A: { gross: 0, net: 0 },
-      B: { gross: 0, net: 0 }
-    };
-
+  const calculateTeamScores = (players: Player[]): { [team: string]: { gross: number; net: number } } => {
+    const scores: { [team: string]: { gross: number; net: number } } = {};
+    
     players.forEach(player => {
+      if (!scores[player.team]) {
+        scores[player.team] = { gross: 0, net: 0 };
+      }
+      
       const totalScore = player.scores.reduce((sum, score) => sum + (score || 0), 0);
       const netScore = totalScore - player.courseHandicap;
       
-      if (player.team === 'A') {
-        scores.A.gross += totalScore;
-        scores.A.net += netScore;
-      } else {
-        scores.B.gross += totalScore;
-        scores.B.net += netScore;
-      }
+      scores[player.team].gross += totalScore;
+      scores[player.team].net += netScore;
     });
 
     return scores;
