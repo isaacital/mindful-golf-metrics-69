@@ -9,7 +9,7 @@ import {
   calculateSkinsResults,
   calculateBirdieResults,
   calculateEagleResults
-} from "@/utils/match";  // Updated import path
+} from "@/utils/match";
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 
@@ -94,16 +94,38 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     if (result.amounts.skins) {
-      // Mock data for now - replace with actual scores
-      const mockScores = players.map(() => Array(18).fill(4));
+      // More realistic mock scores with some variations
+      const mockScores = players.map((_, playerIndex) => 
+        Array(18).fill(0).map((_, holeIndex) => {
+          // Create some variation in scores (between 3 and 6)
+          if (playerIndex === 0 && (holeIndex === 3 || holeIndex === 12)) {
+            return 3; // Some exceptional scores for first player
+          }
+          if (playerIndex === 1 && holeIndex === 7) {
+            return 3; // Good score for second player
+          }
+          return 4 + Math.floor(Math.random() * 3); // Random scores between 4 and 6
+        })
+      );
+      
       const skinsResults = calculateSkinsResults(mockScores, result.amounts.skins, players);
       details.skins = skinsResults;
       allPayments.push(...skinsResults.payments);
     }
 
     if (result.amounts.birdies) {
-      // Mock data for now - replace with actual scores and pars
-      const mockScores = players.map(() => Array(18).fill(4));
+      // Mock scores with some birdies
+      const mockScores = players.map((_, playerIndex) => 
+        Array(18).fill(0).map((_, holeIndex) => {
+          if (playerIndex === 0 && (holeIndex === 2 || holeIndex === 11)) {
+            return 3; // Birdies for first player
+          }
+          if (playerIndex === 1 && holeIndex === 8) {
+            return 3; // Birdie for second player
+          }
+          return 4;
+        })
+      );
       const mockPars = Array(18).fill(4);
       const birdieResults = calculateBirdieResults(mockScores, mockPars, result.amounts.birdies, players);
       details.birdies = birdieResults;
@@ -111,8 +133,15 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     if (result.amounts.eagles) {
-      // Mock data for now - replace with actual scores and pars
-      const mockScores = players.map(() => Array(18).fill(4));
+      // Mock scores with an eagle
+      const mockScores = players.map((_, playerIndex) => 
+        Array(18).fill(0).map((_, holeIndex) => {
+          if (playerIndex === 0 && holeIndex === 5) {
+            return 2; // Eagle for first player on par 4
+          }
+          return 4;
+        })
+      );
       const mockPars = Array(18).fill(4);
       const eagleResults = calculateEagleResults(mockScores, mockPars, result.amounts.eagles, players);
       details.eagles = eagleResults;
