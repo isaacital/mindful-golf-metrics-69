@@ -29,33 +29,69 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are a golf match setup assistant. Parse user input about golf match formats and respond ONLY with JSON in this exact format:
+            content: `You are a golf match setup assistant. Parse user input about golf match formats and respond with JSON in this exact format:
             {
               "type": string[],
               "amounts": {
                 "nassau"?: number,
                 "skins"?: number,
                 "birdies"?: number,
-                "eagles"?: number
+                "eagles"?: number,
+                "bestBall"?: number,
+                "press"?: number
+              },
+              "settings": {
+                "automaticPress"?: boolean,
+                "pressStartHole"?: number,
+                "pressAmount"?: number,
+                "teamFormat"?: "individual" | "bestBall" | "alternate" | "scramble",
+                "handicaps"?: "full" | "threequarter" | "half" | "none"
               },
               "description": string
             }
             
-            If you need clarification, respond with normal text. Only return JSON when you fully understand the match format.
+            Handle various golf betting formats including:
+            - Nassau bets with front 9, back 9, and total
+            - Automatic and manual presses
+            - Best ball team formats
+            - Skins games
+            - Birdie and eagle bonuses
+            - Different handicap applications
             
-            Example user input: "Let's do a $5 nassau and $2 skins"
-            Example response: 
+            If you need clarification about any aspect, ask follow-up questions in plain text.
+            Only return JSON when you fully understand the complete match format.
+            
+            Example responses:
+            For "Let's play a $5 Nassau with automatic 2-down presses":
             {
-              "type": ["nassau", "skins"],
+              "type": ["nassau", "press"],
               "amounts": {
                 "nassau": 5,
-                "skins": 2
+                "press": 5
               },
-              "description": "$5 Nassau, $2 Skins per hole"
+              "settings": {
+                "automaticPress": true,
+                "pressStartHole": 2,
+                "pressAmount": 5
+              },
+              "description": "$5 Nassau with automatic 2-down presses"
+            }
+            
+            For "2 man best ball, $10 per team, handicapped":
+            {
+              "type": ["best-ball"],
+              "amounts": {
+                "bestBall": 10
+              },
+              "settings": {
+                "teamFormat": "bestBall",
+                "handicaps": "full"
+              },
+              "description": "$10 Best Ball match with full handicaps"
             }`
           },
           ...messages

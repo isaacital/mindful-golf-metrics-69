@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MatchResult } from "@/utils/match/types";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,11 +14,14 @@ interface Message {
 }
 
 interface MatchSetupChatProps {
-  onMatchSetup: (matchInput: string) => void;
+  onMatchSetup: (matchResult: MatchResult) => void;
 }
 
 export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([{
+    role: 'assistant',
+    content: "Hi! I'm your golf match setup assistant. Tell me about the match format you'd like to play. I can help with various formats including Nassau, skins, best ball, presses, and more. For example, you could say: 'Let's play a $5 Nassau with automatic 2-down presses, $2 skins, and $1 birdies.'"
+  }]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -66,26 +70,9 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
         }
 
         if (jsonMatch?.type && jsonMatch?.amounts) {
-          // Convert the JSON format to match input string
-          const parts = [];
-          if (jsonMatch.amounts.nassau) {
-            parts.push(`$${jsonMatch.amounts.nassau} Nassau`);
-          }
-          if (jsonMatch.amounts.skins) {
-            parts.push(`$${jsonMatch.amounts.skins} skins`);
-          }
-          if (jsonMatch.amounts.birdies) {
-            parts.push(`$${jsonMatch.amounts.birdies} birdies`);
-          }
-          if (jsonMatch.amounts.eagles) {
-            parts.push(`$${jsonMatch.amounts.eagles} eagles`);
-          }
-          
-          // Only set up the match if we got a valid match format
-          if (parts.length > 0) {
-            onMatchSetup(parts.join(', '));
-            toast.success("Match format set successfully!");
-          }
+          // Pass the entire match result object to the parent
+          onMatchSetup(jsonMatch);
+          toast.success("Match format set successfully!");
         }
       } catch (e) {
         console.error("Error processing match format:", e);

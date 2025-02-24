@@ -1,11 +1,20 @@
 
 export interface MatchResult {
-  type: ('nassau' | 'match' | 'skins' | 'birdies' | 'eagles')[];
+  type: ('nassau' | 'match' | 'skins' | 'birdies' | 'eagles' | 'best-ball' | 'press')[];
   amounts: {
     nassau?: number;
     skins?: number;
     birdies?: number;
     eagles?: number;
+    bestBall?: number;
+    press?: number;
+  };
+  settings?: {
+    automaticPress?: boolean;
+    pressStartHole?: number;
+    pressAmount?: number;
+    teamFormat?: 'individual' | 'bestBall' | 'alternate' | 'scramble';
+    handicaps?: 'full' | 'threequarter' | 'half' | 'none';
   };
   winners: string[];
   losers: string[];
