@@ -110,7 +110,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       
       const skinsResults = calculateSkinsResults(mockScores, result.amounts.skins, players);
       details.skins = skinsResults;
-      allPayments.push(...skinsResults.payments);
+      if (skinsResults.payments) {
+        allPayments.push(...skinsResults.payments);
+      }
     }
 
     if (result.amounts.birdies) {
@@ -129,7 +131,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       const mockPars = Array(18).fill(4);
       const birdieResults = calculateBirdieResults(mockScores, mockPars, result.amounts.birdies, players);
       details.birdies = birdieResults;
-      allPayments.push(...birdieResults.payments);
+      if (birdieResults.payments) {
+        allPayments.push(...birdieResults.payments);
+      }
     }
 
     if (result.amounts.eagles) {
@@ -145,7 +149,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       const mockPars = Array(18).fill(4);
       const eagleResults = calculateEagleResults(mockScores, mockPars, result.amounts.eagles, players);
       details.eagles = eagleResults;
-      allPayments.push(...eagleResults.payments);
+      if (eagleResults.payments) {
+        allPayments.push(...eagleResults.payments);
+      }
     }
 
     // Consolidate all payments
@@ -183,7 +189,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
           >
             <div className="pb-4">
               <div className="flex flex-wrap gap-2">
-                {matchResult.bets.map((bet: string, index: number) => (
+                {matchResult.bets?.map((bet: string, index: number) => (
                   <div 
                     key={index}
                     className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium border border-gray-200"
@@ -217,7 +223,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               </div>
             )}
 
-            {matchResult.details?.skins?.skins.length > 0 && (
+            {matchResult.details?.skins?.skins?.length > 0 && (
               <div className="pt-4 space-y-2">
                 <h4 className="text-sm font-medium mb-2">Skins Results</h4>
                 {matchResult.details.skins.skins.map((skin: any, index: number) => (
@@ -231,7 +237,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               </div>
             )}
 
-            {matchResult.details?.birdies?.birdies.length > 0 && (
+            {matchResult.details?.birdies?.birdies?.length > 0 && (
               <div className="pt-4 space-y-2">
                 <h4 className="text-sm font-medium mb-2">Birdie Results</h4>
                 {matchResult.details.birdies.birdies.map((birdie: any, index: number) => (
@@ -245,7 +251,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               </div>
             )}
 
-            {matchResult.details?.eagles?.eagles.length > 0 && (
+            {matchResult.details?.eagles?.eagles?.length > 0 && (
               <div className="pt-4 space-y-2">
                 <h4 className="text-sm font-medium mb-2">Eagle Results</h4>
                 {matchResult.details.eagles.eagles.map((eagle: any, index: number) => (
@@ -262,7 +268,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
             <div className="pt-4">
               <h4 className="text-sm font-medium mb-2">Final Payment Summary</h4>
               <div className="space-y-2">
-                {matchResult.details.consolidatedPayments.map((payment: any, index: number) => (
+                {matchResult.details.consolidatedPayments?.map((payment: any, index: number) => (
                   <div key={index} className="text-sm p-2 bg-white/80 rounded-lg flex items-center justify-between">
                     <div>
                       <span className="text-red-500 font-medium">{payment.from}</span>
