@@ -88,3 +88,45 @@ export const calculateEagleResults = (
 
   return results;
 };
+
+export const calculateTeamScore = (
+  scores: number[][],
+  teamPlayers: Player[],
+  format: 'aggregate' | 'best-ball' | 'two-best-balls',
+  handicaps: number[] = []
+): number[] => {
+  const teamHoleScores: number[] = Array(scores[0].length).fill(0);
+
+  scores[0].forEach((_, holeIndex) => {
+    const holeScores = teamPlayers.map((_, playerIndex) => {
+      const grossScore = scores[playerIndex][holeIndex];
+      const handicapStrokes = handicaps[playerIndex] || 0;
+      return grossScore - handicapStrokes;
+    });
+
+    switch (format) {
+      case 'best-ball':
+        teamHoleScores[holeIndex] = Math.min(...holeScores);
+        break;
+      case 'two-best-balls':
+        const sortedScores = [...holeScores].sort((a, b) => a - b);
+        teamHoleScores[holeIndex] = sortedScores[0] + sortedScores[1];
+        break;
+      case 'aggregate':
+      default:
+        teamHoleScores[holeIndex] = holeScores.reduce((sum, score) => sum + score, 0);
+        break;
+    }
+  });
+
+  return teamHoleScores;
+};
+
+// Function to calculate strokes given based on handicaps and percentage
+export const calculateHandicapStrokes = (
+  courseHandicap: number,
+  percentage: number
+): number => {
+  return Math.round((courseHandicap * percentage) / 100);
+};
+
