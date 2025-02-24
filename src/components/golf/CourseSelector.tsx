@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 
 interface Course {
   id: string;
@@ -86,36 +87,36 @@ export const CourseSelector = ({ selectedCourse, onCourseChange }: CourseSelecto
 
   return (
     <Card className="mb-8">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
         <CardTitle>Select Course</CardTitle>
+        <Button 
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/course-management')}
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Add Course
+        </Button>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-4 items-center">
-          <Select 
-            value={selectedCourse?.id} 
-            onValueChange={(value) => {
-              const course = courses.find(c => c.id === value);
-              if (course) onCourseChange(course);
-            }}
-          >
-            <SelectTrigger className="w-full md:w-[300px]">
-              <SelectValue placeholder="Select a course" />
-            </SelectTrigger>
-            <SelectContent>
-              {courses.map(course => (
-                <SelectItem key={course.id} value={course.id}>
-                  {course.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button 
-            variant="outline"
-            onClick={() => navigate('/course-management')}
-          >
-            Add Course
-          </Button>
-        </div>
+        <Select 
+          value={selectedCourse?.id} 
+          onValueChange={(value) => {
+            const course = courses.find(c => c.id === value);
+            if (course) onCourseChange(course);
+          }}
+        >
+          <SelectTrigger className="w-full md:w-[300px]">
+            <SelectValue placeholder="Select a course" />
+          </SelectTrigger>
+          <SelectContent>
+            {courses.map(course => (
+              <SelectItem key={course.id} value={course.id}>
+                {course.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </CardContent>
     </Card>
   );
