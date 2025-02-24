@@ -8,7 +8,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -21,7 +20,7 @@ serve(async (req) => {
 
     const { messages } = await req.json()
     
-    console.log('Received messages:', messages) // Debug log
+    console.log('Received messages:', messages)
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -30,30 +29,34 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
           {
             role: 'system',
-            content: `You are a golf match setup assistant. Help players set up their golf match format and betting structure.
-            When users describe their desired match format, analyze their input and convert it into a standardized format that includes:
-            - Nassau bets (front 9, back 9, overall match)
-            - Skins games
-            - Other common golf bets (birdies, eagles)
-            
-            Always clarify amounts and rules. If any detail is unclear, ask follow-up questions.
-            Your responses should be friendly but concise.
-            
-            When you understand the complete match format, return it in a JSON format like this:
+            content: `You are a golf match setup assistant. Parse user input about golf match formats and respond ONLY with JSON in this exact format:
             {
-              "type": ["nassau", "skins", "birdies"],
+              "type": string[],
               "amounts": {
-                "nassau": 5,
-                "skins": 2,
-                "birdies": 1
-              }
+                "nassau"?: number,
+                "skins"?: number,
+                "birdies"?: number,
+                "eagles"?: number
+              },
+              "description": string
             }
             
-            Only return JSON when you're completely confident about the match format. Otherwise, ask clarifying questions.`
+            If you need clarification, respond with normal text. Only return JSON when you fully understand the match format.
+            
+            Example user input: "Let's do a $5 nassau and $2 skins"
+            Example response: 
+            {
+              "type": ["nassau", "skins"],
+              "amounts": {
+                "nassau": 5,
+                "skins": 2
+              },
+              "description": "$5 Nassau, $2 Skins per hole"
+            }`
           },
           ...messages
         ],
@@ -63,30 +66,22 @@ serve(async (req) => {
     })
 
     const data = await response.json()
-    console.log('OpenAI response:', data) // Debug log
+    console.log('OpenAI response:', data)
 
     if (!response.ok) {
       throw new Error(`OpenAI API error: ${JSON.stringify(data)}`)
     }
 
     return new Response(JSON.stringify(data), {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'application/json' 
-      }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   } catch (error) {
-    console.error('Error in chat-match-setup:', error) // Debug log
+    console.error('Error in chat-match-setup:', error)
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'An error occurred while processing your request' 
-      }), 
+      JSON.stringify({ error: error.message || 'An error occurred while processing your request' }), 
       { 
         status: 500,
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
   }

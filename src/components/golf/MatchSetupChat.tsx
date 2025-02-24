@@ -54,10 +54,18 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
         content: assistantMessage.content 
       }]);
 
-      // Check if the response contains valid JSON match setup
       try {
-        const jsonMatch = JSON.parse(assistantMessage.content);
-        if (jsonMatch.type && jsonMatch.amounts) {
+        // Try to parse the response as JSON
+        let jsonMatch = null;
+        
+        try {
+          jsonMatch = JSON.parse(assistantMessage.content);
+        } catch {
+          // If it's not JSON, it's a clarifying question from the AI
+          return;
+        }
+
+        if (jsonMatch?.type && jsonMatch?.amounts) {
           // Convert the JSON format to match input string
           const parts = [];
           if (jsonMatch.amounts.nassau) {
@@ -72,10 +80,15 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
           if (jsonMatch.amounts.eagles) {
             parts.push(`$${jsonMatch.amounts.eagles} eagles`);
           }
-          onMatchSetup(parts.join(', '));
+          
+          // Only set up the match if we got a valid match format
+          if (parts.length > 0) {
+            onMatchSetup(parts.join(', '));
+            toast.success("Match format set successfully!");
+          }
         }
       } catch (e) {
-        // Not JSON format, continue conversation
+        console.error("Error processing match format:", e);
       }
     } catch (error) {
       console.error("Error details:", error);
