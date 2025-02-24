@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -95,12 +96,21 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   };
 
   const handleMatchSetup = () => {
+    if (!matchInput.trim()) {
+      toast({
+        title: "Empty Input",
+        description: "Please enter match details",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const result = parseMatchInput(matchInput);
     
     if (!result) {
       toast({
-        title: "Invalid Input",
-        description: "Please enter valid match details (e.g., '$5 Nassau, birdies $1, eagles $3, skins $2')",
+        title: "No Valid Bets Found",
+        description: "Could not detect any valid bet amounts in your input. Try something like '5 Nassau' or '5/5/10'",
         variant: "destructive",
       });
       return;
@@ -204,7 +214,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       <CardContent>
         <div className="flex space-x-4 mb-6">
           <Input
-            placeholder="Enter match details (e.g., '$5 Nassau, birdies $1, eagles $3, skins $2')"
+            placeholder="Enter match details (e.g., '5/5/10' or '$5 Nassau, birdies $1, eagles $3, skins $2')"
             value={matchInput}
             onChange={(e) => setMatchInput(e.target.value)}
             className="flex-1 bg-white/80"
