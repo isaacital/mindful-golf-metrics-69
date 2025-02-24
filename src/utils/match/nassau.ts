@@ -9,11 +9,41 @@ interface NassauResult {
   payments: PaymentDetail[];
 }
 
+interface TeamResult {
+  team: 'A' | 'B';
+  score: number;
+}
+
+const determineWinner = (
+  teamAScore: number,
+  teamBScore: number,
+  isMatchPlay: boolean
+): TeamResult | null => {
+  if (isMatchPlay) {
+    // In match play, the lower score wins the hole
+    if (teamAScore < teamBScore) {
+      return { team: 'A', score: 1 };
+    } else if (teamBScore < teamAScore) {
+      return { team: 'B', score: 1 };
+    }
+    return null; // Halved hole
+  } else {
+    // In stroke play, we compare total strokes
+    if (teamAScore < teamBScore) {
+      return { team: 'A', score: teamBScore - teamAScore };
+    } else if (teamBScore < teamAScore) {
+      return { team: 'B', score: teamAScore - teamBScore };
+    }
+    return null; // Tied
+  }
+};
+
 export const calculateNassauResults = (
   teamAScores: TeamScores,
   teamBScores: TeamScores,
   amount: number,
-  players: Player[]
+  players: Player[],
+  isMatchPlay: boolean = false
 ): NassauResult => {
   const results = {
     front9: { winner: '', amount: 0 },
@@ -27,26 +57,22 @@ export const calculateNassauResults = (
   const teamBPlayers = players.filter(p => p.team === 'B');
 
   // Front 9
-  if (teamAScores.front9 < teamBScores.front9) {
-    results.front9 = { winner: 'Team A', amount };
-    teamBPlayers.forEach((loser, index) => {
-      if (index < teamAPlayers.length) {
+  const front9Result = determineWinner(teamAScores.front9, teamBScores.front9, isMatchPlay);
+  if (front9Result) {
+    results.front9 = { 
+      winner: `Team ${front9Result.team}`, 
+      amount: isMatchPlay ? amount : amount * front9Result.score 
+    };
+    
+    const winners = front9Result.team === 'A' ? teamAPlayers : teamBPlayers;
+    const losers = front9Result.team === 'A' ? teamBPlayers : teamAPlayers;
+    
+    losers.forEach((loser, index) => {
+      if (index < winners.length) {
         results.payments.push({
           from: loser.name,
-          to: teamAPlayers[index].name,
-          amount,
-          reason: 'Front 9'
-        });
-      }
-    });
-  } else if (teamBScores.front9 < teamAScores.front9) {
-    results.front9 = { winner: 'Team B', amount };
-    teamAPlayers.forEach((loser, index) => {
-      if (index < teamBPlayers.length) {
-        results.payments.push({
-          from: loser.name,
-          to: teamBPlayers[index].name,
-          amount,
+          to: winners[index].name,
+          amount: isMatchPlay ? amount : amount * front9Result.score,
           reason: 'Front 9'
         });
       }
@@ -54,26 +80,22 @@ export const calculateNassauResults = (
   }
 
   // Back 9
-  if (teamAScores.back9 < teamBScores.back9) {
-    results.back9 = { winner: 'Team A', amount };
-    teamBPlayers.forEach((loser, index) => {
-      if (index < teamAPlayers.length) {
+  const back9Result = determineWinner(teamAScores.back9, teamBScores.back9, isMatchPlay);
+  if (back9Result) {
+    results.back9 = { 
+      winner: `Team ${back9Result.team}`, 
+      amount: isMatchPlay ? amount : amount * back9Result.score 
+    };
+    
+    const winners = back9Result.team === 'A' ? teamAPlayers : teamBPlayers;
+    const losers = back9Result.team === 'A' ? teamBPlayers : teamAPlayers;
+    
+    losers.forEach((loser, index) => {
+      if (index < winners.length) {
         results.payments.push({
           from: loser.name,
-          to: teamAPlayers[index].name,
-          amount,
-          reason: 'Back 9'
-        });
-      }
-    });
-  } else if (teamBScores.back9 < teamAScores.back9) {
-    results.back9 = { winner: 'Team B', amount };
-    teamAPlayers.forEach((loser, index) => {
-      if (index < teamBPlayers.length) {
-        results.payments.push({
-          from: loser.name,
-          to: teamBPlayers[index].name,
-          amount,
+          to: winners[index].name,
+          amount: isMatchPlay ? amount : amount * back9Result.score,
           reason: 'Back 9'
         });
       }
@@ -81,26 +103,22 @@ export const calculateNassauResults = (
   }
 
   // Total
-  if (teamAScores.total < teamBScores.total) {
-    results.total = { winner: 'Team A', amount };
-    teamBPlayers.forEach((loser, index) => {
-      if (index < teamAPlayers.length) {
+  const totalResult = determineWinner(teamAScores.total, teamBScores.total, isMatchPlay);
+  if (totalResult) {
+    results.total = { 
+      winner: `Team ${totalResult.team}`, 
+      amount: isMatchPlay ? amount : amount * totalResult.score 
+    };
+    
+    const winners = totalResult.team === 'A' ? teamAPlayers : teamBPlayers;
+    const losers = totalResult.team === 'A' ? teamBPlayers : teamAPlayers;
+    
+    losers.forEach((loser, index) => {
+      if (index < winners.length) {
         results.payments.push({
           from: loser.name,
-          to: teamAPlayers[index].name,
-          amount,
-          reason: 'Total Match'
-        });
-      }
-    });
-  } else if (teamBScores.total < teamAScores.total) {
-    results.total = { winner: 'Team B', amount };
-    teamAPlayers.forEach((loser, index) => {
-      if (index < teamBPlayers.length) {
-        results.payments.push({
-          from: loser.name,
-          to: teamBPlayers[index].name,
-          amount,
+          to: winners[index].name,
+          amount: isMatchPlay ? amount : amount * totalResult.score,
           reason: 'Total Match'
         });
       }
