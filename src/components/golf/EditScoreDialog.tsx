@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,21 @@ export const EditScoreDialog = ({
 }: EditScoreDialogProps) => {
   if (!player) return null;
 
+  const handleScoreChange = (holeNumber: number, value: string) => {
+    const score = value === "" ? null : parseInt(value, 10);
+    if (score !== null && !isNaN(score)) {
+      onUpdateScore(player.id, holeNumber, score);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Edit Scores - {player.name}</DialogTitle>
+          <DialogDescription>
+            Enter scores for each hole. Leave empty for incomplete holes.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-6 md:grid-cols-9 gap-4 p-4">
           {holes.map((hole, index) => (
@@ -46,9 +57,10 @@ export const EditScoreDialog = ({
               <Input
                 type="number"
                 value={player.scores[index] || ""}
-                onChange={(e) => onUpdateScore(player.id, hole.number, parseInt(e.target.value))}
+                onChange={(e) => handleScoreChange(hole.number, e.target.value)}
                 className="w-full text-center"
                 min={1}
+                placeholder="-"
               />
             </div>
           ))}
