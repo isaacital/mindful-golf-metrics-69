@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -71,6 +70,19 @@ const Index = () => {
     return Math.round(handicapIndex * (selectedTee.slope / 113) + (selectedTee.rating - 72));
   };
 
+  const updateScore = (playerId: string, holeNumber: number, score: number) => {
+    setPlayers(currentPlayers => 
+      currentPlayers.map(player => {
+        if (player.id === playerId) {
+          const newScores = [...player.scores];
+          newScores[holeNumber - 1] = score;
+          return { ...player, scores: newScores };
+        }
+        return player;
+      })
+    );
+  };
+
   const addPlayer = () => {
     if (newPlayerName && newPlayerHandicap && selectedCourse) {
       const courseHandicap = calculateCourseHandicap(parseFloat(newPlayerHandicap), newPlayerTee);
@@ -96,17 +108,6 @@ const Index = () => {
       setPlayers(players.filter(p => p.id !== playerId));
       toast.success(`${player.name} removed from the match`);
     }
-  };
-
-  const updateScore = (playerId: string, holeNumber: number, score: number) => {
-    setPlayers(players.map(player => {
-      if (player.id === playerId) {
-        const newScores = [...player.scores];
-        newScores[holeNumber - 1] = score;
-        return { ...player, scores: newScores };
-      }
-      return player;
-    }));
   };
 
   const updateTeam = (playerId: string, team: 'A' | 'B') => {
