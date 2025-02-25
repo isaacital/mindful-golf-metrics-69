@@ -9,7 +9,7 @@ import {
   calculateBirdieResults,
   calculateEagleResults
 } from "@/utils/match";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { MatchSetupChat } from "./MatchSetupChat";
 import { NassauResults } from "./match-results/NassauResults";
@@ -27,7 +27,7 @@ interface MatchSetupProps {
 }
 
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
-  const [matchInput, setMatchInput] = useState("");
+  const [matchInput, setMatchInput] = useState<string>("");
   const [matchResult, setMatchResult] = useState<any>(null);
   const [holeScores, setHoleScores] = useState<{ [key: number]: { [key: string]: number } }>({});
 
@@ -95,11 +95,10 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   };
 
   const handleMatchSetup = () => {
-    if (!matchInput.trim()) {
+    if (!matchInput || typeof matchInput !== 'string') {
       toast({
         title: "Empty Input",
         description: "Please enter match details",
-        variant: "destructive",
       });
       return;
     }
@@ -110,7 +109,6 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       toast({
         title: "No Valid Bets Found",
         description: "Could not detect any valid bet amounts in your input. Try something like '5 Nassau' or '5/5/10'",
-        variant: "destructive",
       });
       return;
     }
@@ -136,7 +134,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       );
 
       details.nassau = nassauResults;
-      allPayments.push(...nassauResults.payments);
+      if (nassauResults.payments) {
+        allPayments.push(...nassauResults.payments);
+      }
     }
 
     if (result.amounts.skins) {
@@ -209,10 +209,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     setHoleScores(newHoleScores);
     setMatchResult({ ...result, details });
 
-    toast({
-      title: "Match Setup",
-      description: "Match details have been set successfully",
-    });
+    toast.success("Match details have been set successfully");
   };
 
   return (
