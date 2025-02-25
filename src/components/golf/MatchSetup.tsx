@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { 
   parseMatchInput, 
   calculateNassauResults,
@@ -9,7 +8,7 @@ import {
   calculateBirdieResults,
   calculateEagleResults
 } from "@/utils/match";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { MatchSetupChat } from "./MatchSetupChat";
 import { NassauResults } from "./match-results/NassauResults";
@@ -95,8 +94,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   };
 
   const handleMatchSetup = (result: MatchResult) => {
-    let newResult = { ...result };
-    let details: MatchResult['details'] = {};
+    let details: any = {};
     let allPayments: any[] = [];
     let newHoleScores: { [key: number]: { [key: string]: number } } = {};
 
@@ -189,9 +187,8 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     details.consolidatedPayments = consolidatePayments(allPayments);
-    newResult.details = details;
     setHoleScores(newHoleScores);
-    setMatchResult(newResult);
+    setMatchResult({ ...result, details });
   };
 
   return (
@@ -210,6 +207,31 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               className="space-y-4 divide-y divide-gray-100"
             >
               <div className="pb-4">
+                <div className="mb-4 p-4 bg-white/80 rounded-lg border border-gray-200">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Match Configuration</h3>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {matchResult.type.map((type, index) => (
+                        <span key={index} className="px-2 py-1 bg-primary/10 rounded-full text-xs font-medium text-primary">
+                          {type}
+                        </span>
+                      ))}
+                    </div>
+                    {matchResult.settings && (
+                      <div className="text-sm text-gray-600">
+                        {matchResult.settings.teamFormat && (
+                          <span className="mr-3">Format: {matchResult.settings.teamFormat}</span>
+                        )}
+                        {matchResult.settings.handicaps && (
+                          <span className="mr-3">Handicaps: {matchResult.settings.handicaps}</span>
+                        )}
+                        {matchResult.settings.automaticPress && (
+                          <span>Auto Press: {matchResult.settings.pressStartHole}-down</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {matchResult.bets?.map((bet, index) => (
                     <div 

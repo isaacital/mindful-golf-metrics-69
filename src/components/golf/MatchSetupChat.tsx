@@ -53,29 +53,32 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
       }
 
       const assistantMessage = data.choices[0].message;
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: assistantMessage.content 
-      }]);
-
+      
       try {
         // Try to parse the response as JSON
-        let jsonMatch = null;
+        const jsonMatch = JSON.parse(assistantMessage.content);
         
-        try {
-          jsonMatch = JSON.parse(assistantMessage.content);
-        } catch {
-          // If it's not JSON, it's a clarifying question from the AI
-          return;
-        }
-
         if (jsonMatch?.type && jsonMatch?.amounts) {
-          // Pass the entire match result object to the parent
+          // Pass the match result to the parent component
           onMatchSetup(jsonMatch);
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: "Great! I've set up the match format you requested. Let me know if you'd like to make any adjustments." 
+          }]);
           toast.success("Match format set successfully!");
+        } else {
+          // If it's not a valid match format, show the message as a regular response
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: assistantMessage.content 
+          }]);
         }
-      } catch (e) {
-        console.error("Error processing match format:", e);
+      } catch {
+        // If it's not JSON, it's a clarifying question from the AI
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: assistantMessage.content 
+        }]);
       }
     } catch (error) {
       console.error("Error details:", error);
