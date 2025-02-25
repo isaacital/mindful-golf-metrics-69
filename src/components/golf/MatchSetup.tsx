@@ -39,6 +39,37 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     return amount ? `${formattedType} ($${amount})` : formattedType;
   };
 
+  const formatScoringFormat = (format: MatchResult['scoringFormat']) => {
+    const parts = [];
+    
+    // Add scoring type (Match vs Stroke)
+    parts.push(format.type === 'match' ? 'Match Play' : 'Stroke Play');
+    
+    // Add team scoring format if applicable
+    switch (format.teamScoring) {
+      case 'best-ball':
+        parts.push('Best Ball');
+        break;
+      case 'two-best-balls':
+        parts.push('2 Best Balls');
+        break;
+      case 'aggregate':
+        parts.push('Aggregate');
+        break;
+    }
+    
+    // Add handicap percentage if not 100%
+    if (format.handicapPercentage !== 100) {
+      if (format.handicapPercentage === 0) {
+        parts.push('No Handicap');
+      } else {
+        parts.push(`${format.handicapPercentage}% Handicap`);
+      }
+    }
+    
+    return parts.join(' • ');
+  };
+
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
     const netAmounts = new Map<string, number>();
     
@@ -218,25 +249,37 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               <div className="pb-4">
                 <div className="mb-4 p-4 bg-white/80 rounded-lg border border-gray-200">
                   <h3 className="text-sm font-medium text-gray-500 mb-2">Match Configuration</h3>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {matchResult.type.map((type, index) => (
-                        <span key={index} className="px-3 py-1.5 bg-primary/10 rounded-full text-xs font-medium text-primary">
-                          {formatGameType(type, matchResult.amounts)}
-                        </span>
-                      ))}
+                  <div className="space-y-4">
+                    <div>
+                      <div className="text-sm font-medium text-gray-700 mb-1">Scoring Format</div>
+                      <div className="text-sm text-gray-600">
+                        {formatScoringFormat(matchResult.scoringFormat)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-700 mb-2">Wagers</div>
+                      <div className="flex flex-wrap gap-2">
+                        {matchResult.type.map((type, index) => (
+                          <span key={index} className="px-3 py-1.5 bg-primary/10 rounded-full text-xs font-medium text-primary">
+                            {formatGameType(type, matchResult.amounts)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                     {matchResult.settings && (
-                      <div className="text-sm text-gray-600">
-                        {matchResult.settings.teamFormat && (
-                          <span className="mr-3">Format: {matchResult.settings.teamFormat}</span>
-                        )}
-                        {matchResult.settings.handicaps && (
-                          <span className="mr-3">Handicaps: {matchResult.settings.handicaps}</span>
-                        )}
-                        {matchResult.settings.automaticPress && (
-                          <span>Auto Press: {matchResult.settings.pressStartHole}-down</span>
-                        )}
+                      <div>
+                        <div className="text-sm font-medium text-gray-700 mb-1">Additional Settings</div>
+                        <div className="text-sm text-gray-600">
+                          {matchResult.settings.teamFormat && (
+                            <span className="mr-3">Format: {matchResult.settings.teamFormat}</span>
+                          )}
+                          {matchResult.settings.handicaps && (
+                            <span className="mr-3">Handicaps: {matchResult.settings.handicaps}</span>
+                          )}
+                          {matchResult.settings.automaticPress && (
+                            <span>Auto Press: {matchResult.settings.pressStartHole}-down</span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
