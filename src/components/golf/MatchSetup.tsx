@@ -1,13 +1,6 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  parseMatchInput, 
-  calculateNassauResults,
-  calculateSkinsResults,
-  calculateBirdieResults,
-  calculateEagleResults
-} from "@/utils/match";
+import { parseMatchInput } from "@/utils/match";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { MatchSetupChat } from "./MatchSetupChat";
@@ -39,7 +32,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     return amount ? `${formattedType} ($${amount})` : formattedType;
   };
 
-  const formatScoringFormat = (format: MatchResult['scoringFormat']) => {
+  const formatScoringFormat = (format: MatchResult['scoringFormat'] | undefined) => {
+    if (!format) return '';
+    
     const parts = [];
     
     // Add scoring type (Match vs Stroke)
@@ -52,6 +47,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
         break;
       case 'two-best-balls':
         parts.push('2 Best Balls');
+        break;
+      case 'three-best-balls':
+        parts.push('3 Best Balls');
         break;
       case 'aggregate':
         parts.push('Aggregate');
@@ -250,12 +248,14 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
                 <div className="mb-4 p-4 bg-white/80 rounded-lg border border-gray-200">
                   <h3 className="text-sm font-medium text-gray-500 mb-2">Match Configuration</h3>
                   <div className="space-y-4">
-                    <div>
-                      <div className="text-sm font-medium text-gray-700 mb-1">Scoring Format</div>
-                      <div className="text-sm text-gray-600">
-                        {formatScoringFormat(matchResult.scoringFormat)}
+                    {matchResult.scoringFormat && (
+                      <div>
+                        <div className="text-sm font-medium text-gray-700 mb-1">Scoring Format</div>
+                        <div className="text-sm text-gray-600">
+                          {formatScoringFormat(matchResult.scoringFormat)}
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div>
                       <div className="text-sm font-medium text-gray-700 mb-2">Wagers</div>
                       <div className="flex flex-wrap gap-2">
