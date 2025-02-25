@@ -1,6 +1,6 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
   parseMatchInput, 
@@ -9,7 +9,7 @@ import {
   calculateBirdieResults,
   calculateEagleResults
 } from "@/utils/match";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { MatchSetupChat } from "./MatchSetupChat";
 import { NassauResults } from "./match-results/NassauResults";
@@ -17,6 +17,7 @@ import { SkinsResults } from "./match-results/SkinsResults";
 import { BirdieResults } from "./match-results/BirdieResults";
 import { EagleResults } from "./match-results/EagleResults";
 import { PaymentSummary } from "./match-results/PaymentSummary";
+import { MatchResult } from "@/utils/match/types";
 
 interface MatchSetupProps {
   teamScores: {
@@ -27,8 +28,7 @@ interface MatchSetupProps {
 }
 
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
-  const [matchInput, setMatchInput] = useState<string>("");
-  const [matchResult, setMatchResult] = useState<any>(null);
+  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [holeScores, setHoleScores] = useState<{ [key: number]: { [key: string]: number } }>({});
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
@@ -94,26 +94,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }));
   };
 
-  const handleMatchSetup = () => {
-    if (!matchInput || typeof matchInput !== 'string') {
-      toast({
-        title: "Empty Input",
-        description: "Please enter match details",
-      });
-      return;
-    }
-
-    const result = parseMatchInput(matchInput);
-    
-    if (!result) {
-      toast({
-        title: "No Valid Bets Found",
-        description: "Could not detect any valid bet amounts in your input. Try something like '5 Nassau' or '5/5/10'",
-      });
-      return;
-    }
-
-    let details: any = {};
+  const handleMatchSetup = (result: MatchResult) => {
+    let newResult = { ...result };
+    let details: MatchResult['details'] = {};
     let allPayments: any[] = [];
     let newHoleScores: { [key: number]: { [key: string]: number } } = {};
 
@@ -206,10 +189,9 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     details.consolidatedPayments = consolidatePayments(allPayments);
+    newResult.details = details;
     setHoleScores(newHoleScores);
-    setMatchResult({ ...result, details });
-
-    toast.success("Match details have been set successfully");
+    setMatchResult(newResult);
   };
 
   return (
@@ -219,19 +201,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <MatchSetupChat onMatchSetup={setMatchInput} />
-          
-          <div className="flex space-x-4">
-            <Input
-              placeholder="Match details will appear here..."
-              value={matchInput}
-              onChange={(e) => setMatchInput(e.target.value)}
-              className="flex-1 bg-white/80"
-            />
-            <Button onClick={handleMatchSetup} className="whitespace-nowrap">
-              Set Match
-            </Button>
-          </div>
+          <MatchSetupChat onMatchSetup={handleMatchSetup} />
 
           {matchResult && (
             <motion.div 
@@ -241,10 +211,10 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
             >
               <div className="pb-4">
                 <div className="flex flex-wrap gap-2">
-                  {matchResult.bets?.map((bet: string, index: number) => (
+                  {matchResult.bets?.map((bet, index) => (
                     <div 
                       key={index}
-                      className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium border border-gray-200"
+                      className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium shadow-sm border border-gray-100"
                     >
                       {bet}
                     </div>
@@ -271,7 +241,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
                 <EagleResults eagles={matchResult.details.eagles.eagles} />
               )}
 
-              {matchResult.details.consolidatedPayments && (
+              {matchResult.details?.consolidatedPayments && (
                 <PaymentSummary payments={matchResult.details.consolidatedPayments} />
               )}
             </motion.div>

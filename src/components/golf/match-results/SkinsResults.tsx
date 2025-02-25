@@ -15,7 +15,9 @@ export const SkinsResults = ({ skins, holeScores }: SkinsResultsProps) => {
 
   return (
     <div className="pt-4 space-y-2">
-      <h4 className="text-sm font-medium mb-2">Skins Results</h4>
+      <div className="flex items-center gap-2">
+        <h4 className="text-sm font-medium">Skins Results</h4>
+      </div>
       {skins.map((skin, index) => (
         <div
           key={index}

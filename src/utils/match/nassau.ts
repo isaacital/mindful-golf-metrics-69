@@ -28,82 +28,82 @@ export const calculateNassauResults = (
 
   // Front 9
   if (teamAScores.front9 < teamBScores.front9) {
-    results.front9 = { winner: 'Team A', amount: amount * teamAPlayers.length };
-    teamBPlayers.forEach(loser => {
-      teamAPlayers.forEach(winner => {
+    results.front9 = { winner: 'Team A', amount };
+    teamBPlayers.forEach((loser, index) => {
+      if (index < teamAPlayers.length) {
         results.payments.push({
           from: loser.name,
-          to: winner.name,
-          amount: amount,
+          to: teamAPlayers[index].name,
+          amount,
           reason: 'Front 9'
         });
-      });
+      }
     });
   } else if (teamBScores.front9 < teamAScores.front9) {
-    results.front9 = { winner: 'Team B', amount: amount * teamBPlayers.length };
-    teamAPlayers.forEach(loser => {
-      teamBPlayers.forEach(winner => {
+    results.front9 = { winner: 'Team B', amount };
+    teamAPlayers.forEach((loser, index) => {
+      if (index < teamBPlayers.length) {
         results.payments.push({
           from: loser.name,
-          to: winner.name,
-          amount: amount,
+          to: teamBPlayers[index].name,
+          amount,
           reason: 'Front 9'
         });
-      });
+      }
     });
   }
 
   // Back 9
   if (teamAScores.back9 < teamBScores.back9) {
-    results.back9 = { winner: 'Team A', amount: amount * teamAPlayers.length };
-    teamBPlayers.forEach(loser => {
-      teamAPlayers.forEach(winner => {
+    results.back9 = { winner: 'Team A', amount };
+    teamBPlayers.forEach((loser, index) => {
+      if (index < teamAPlayers.length) {
         results.payments.push({
           from: loser.name,
-          to: winner.name,
-          amount: amount,
+          to: teamAPlayers[index].name,
+          amount,
           reason: 'Back 9'
         });
-      });
+      }
     });
   } else if (teamBScores.back9 < teamAScores.back9) {
-    results.back9 = { winner: 'Team B', amount: amount * teamBPlayers.length };
-    teamAPlayers.forEach(loser => {
-      teamBPlayers.forEach(winner => {
+    results.back9 = { winner: 'Team B', amount };
+    teamAPlayers.forEach((loser, index) => {
+      if (index < teamBPlayers.length) {
         results.payments.push({
           from: loser.name,
-          to: winner.name,
-          amount: amount,
+          to: teamBPlayers[index].name,
+          amount,
           reason: 'Back 9'
         });
-      });
+      }
     });
   }
 
   // Total
   if (teamAScores.total < teamBScores.total) {
-    results.total = { winner: 'Team A', amount: amount * teamAPlayers.length };
-    teamBPlayers.forEach(loser => {
-      teamAPlayers.forEach(winner => {
+    results.total = { winner: 'Team A', amount };
+    teamBPlayers.forEach((loser, index) => {
+      if (index < teamAPlayers.length) {
         results.payments.push({
           from: loser.name,
-          to: winner.name,
-          amount: amount,
+          to: teamAPlayers[index].name,
+          amount,
           reason: 'Total Match'
         });
-      });
+      }
     });
   } else if (teamBScores.total < teamAScores.total) {
-    results.total = { winner: 'Team B', amount: amount * teamBPlayers.length };
-    teamAPlayers.forEach(loser => {
-      teamBPlayers.forEach(winner => {
+    results.total = { winner: 'Team B', amount };
+    teamAPlayers.forEach((loser, index) => {
+      if (index < teamBPlayers.length) {
         results.payments.push({
           from: loser.name,
-          to: winner.name,
-          amount: amount,
+          to: teamBPlayers[index].name,
+          amount,
           reason: 'Total Match'
         });
-      });
+      }
     });
   }
 

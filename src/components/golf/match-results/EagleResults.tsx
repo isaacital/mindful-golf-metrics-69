@@ -14,7 +14,9 @@ export const EagleResults = ({ eagles }: EagleResultsProps) => {
 
   return (
     <div className="pt-4 space-y-2">
-      <h4 className="text-sm font-medium mb-2">Eagle Results</h4>
+      <div className="flex items-center gap-2">
+        <h4 className="text-sm font-medium">Eagle Results</h4>
+      </div>
       {eagles.map((eagle, index) => (
         <div
           key={index}
