@@ -33,39 +33,132 @@ serve(async (req) => {
             role: 'system',
             content: `You are a golf scoring assistant that calculates match results based on provided scores and rules.
             
-            Rules for different match types:
-            - Nassau: Calculate front 9, back 9, and total match separately
-            - Skins: Each hole is worth the stake amount, ties carry over
-            - Birdies: Player gets paid by all others for scoring under par
-            - Eagles: Player gets paid double birdie amount for scoring 2 under par
-            - Best Ball: Use lowest score between team members for each hole
-            
             Return results in this exact JSON format:
             {
-              "type": string[],
-              "details": {
-                "nassau"?: {
-                  "front9": { "winner": string, "amount": number },
-                  "back9": { "winner": string, "amount": number },
-                  "total": { "winner": string, "amount": number }
-                },
-                "skins"?: {
-                  "skins": Array<{ hole: number, winner: string, amount: number }>,
-                  "payments": Array<{ from: string, to: string, amount: number, reason: string }>
-                },
-                "birdies"?: {
-                  "birdies": Array<{ hole: number, player: string, amount: number }>,
-                  "payments": Array<{ from: string, to: string, amount: number, reason: string }>
-                },
-                "eagles"?: {
-                  "eagles": Array<{ hole: number, player: string, amount: number }>,
-                  "payments": Array<{ from: string, to: string, amount: number, reason: string }>
+              "type": string[],  // Array of game types being played
+              "settings": {
+                "playType": "stroke" | "match",  // Default to "stroke" if not specified
+                "bestBalls": number,  // Number of best balls to count, default to 1
+                "handicapHandling": {
+                  "type": "none" | "full" | "percentage",
+                  "percentage": number  // e.g., 90 for 90% handicap
                 }
               },
-              "consolidatedPayments": Array<{
-                from: string,
-                payees: Array<{ to: string, amount: number, reason: string }>
-              }>
+              "details": {
+                "teams": {
+                  "A": {
+                    "front9": number,
+                    "back9": number,
+                    "total": number,
+                    "scores": number[]  // Array of 18 holes
+                  },
+                  "B": {
+                    "front9": number,
+                    "back9": number,
+                    "total": number,
+                    "scores": number[]  // Array of 18 holes
+                  }
+                },
+                "nassau"?: {
+                  "front9": { 
+                    "winner": string, 
+                    "amount": number,
+                    "summary": string  // e.g., "Team A wins front 9 by 2 holes"
+                  },
+                  "back9": { 
+                    "winner": string, 
+                    "amount": number,
+                    "summary": string
+                  },
+                  "total": { 
+                    "winner": string, 
+                    "amount": number,
+                    "summary": string
+                  }
+                },
+                "skins"?: {
+                  "holes": Array<{
+                    "hole": number,
+                    "winner": string,
+                    "amount": number,
+                    "score": number,
+                    "carryover": boolean,  // true if this skin included carried over amounts
+                    "summary": string  // e.g., "John wins hole 4 with a birdie"
+                  }>,
+                  "totalAmount": number
+                },
+                "birdies"?: {
+                  "players": Array<{
+                    "name": string,
+                    "holes": Array<{
+                      "hole": number,
+                      "score": number,
+                      "par": number,
+                      "amount": number
+                    }>,
+                    "totalAmount": number
+                  }>
+                },
+                "eagles"?: {
+                  "players": Array<{
+                    "name": string,
+                    "holes": Array<{
+                      "hole": number,
+                      "score": number,
+                      "par": number,
+                      "amount": number
+                    }>,
+                    "totalAmount": number
+                  }>
+                },
+                "bestBall"?: {
+                  "teams": {
+                    "A": {
+                      "scores": number[],  // Array of 18 best ball scores
+                      "total": number
+                    },
+                    "B": {
+                      "scores": number[],
+                      "total": number
+                    }
+                  },
+                  "winner": string,
+                  "amount": number,
+                  "summary": string  // e.g., "Team A wins best ball by 3 strokes"
+                }
+              },
+              "payments": Array<{
+                "from": string,
+                "to": string,
+                "amount": number,
+                "reason": string,  // Detailed reason e.g., "Nassau front 9 - Team A wins by 2 holes"
+                "gameType": string  // e.g., "nassau", "skins", "birdies", etc.
+              }>,
+              "summary": {
+                "byPlayer": Array<{
+                  "name": string,
+                  "totalOwed": number,  // Negative if they owe money
+                  "totalWon": number,
+                  "netAmount": number,
+                  "details": Array<{
+                    "gameType": string,
+                    "amount": number,
+                    "description": string
+                  }>
+                }>,
+                "byTeam": {
+                  "A": {
+                    "totalWon": number,
+                    "totalLost": number,
+                    "netAmount": number
+                  },
+                  "B": {
+                    "totalWon": number,
+                    "totalLost": number,
+                    "netAmount": number
+                  }
+                }
+              }
             }`
           },
           {
@@ -78,7 +171,7 @@ serve(async (req) => {
           }
         ],
         temperature: 0.1, // Low temperature for consistent calculations
-        max_tokens: 1000
+        max_tokens: 2000
       }),
     });
 
