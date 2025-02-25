@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
   parseMatchInput, 
@@ -17,7 +17,6 @@ import { SkinsResults } from "./match-results/SkinsResults";
 import { BirdieResults } from "./match-results/BirdieResults";
 import { EagleResults } from "./match-results/EagleResults";
 import { PaymentSummary } from "./match-results/PaymentSummary";
-import { MatchResult } from "@/utils/match/types";
 
 interface MatchSetupProps {
   teamScores: {
@@ -28,7 +27,8 @@ interface MatchSetupProps {
 }
 
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
-  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
+  const [matchInput, setMatchInput] = useState("");
+  const [matchResult, setMatchResult] = useState<any>(null);
   const [holeScores, setHoleScores] = useState<{ [key: number]: { [key: string]: number } }>({});
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
@@ -94,9 +94,28 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }));
   };
 
-  const handleMatchSetup = (result: MatchResult) => {
-    let newResult = { ...result };
-    let details: MatchResult['details'] = {};
+  const handleMatchSetup = () => {
+    if (!matchInput.trim()) {
+      toast({
+        title: "Empty Input",
+        description: "Please enter match details",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const result = parseMatchInput(matchInput);
+    
+    if (!result) {
+      toast({
+        title: "No Valid Bets Found",
+        description: "Could not detect any valid bet amounts in your input. Try something like '5 Nassau' or '5/5/10'",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let details: any = {};
     let allPayments: any[] = [];
     let newHoleScores: { [key: number]: { [key: string]: number } } = {};
 
@@ -117,9 +136,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       );
 
       details.nassau = nassauResults;
-      if (nassauResults.payments) {
-        allPayments.push(...nassauResults.payments);
-      }
+      allPayments.push(...nassauResults.payments);
     }
 
     if (result.amounts.skins) {
@@ -189,9 +206,13 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }
 
     details.consolidatedPayments = consolidatePayments(allPayments);
-    newResult.details = details;
     setHoleScores(newHoleScores);
-    setMatchResult(newResult);
+    setMatchResult({ ...result, details });
+
+    toast({
+      title: "Match Setup",
+      description: "Match details have been set successfully",
+    });
   };
 
   return (
@@ -201,7 +222,19 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <MatchSetupChat onMatchSetup={handleMatchSetup} />
+          <MatchSetupChat onMatchSetup={setMatchInput} />
+          
+          <div className="flex space-x-4">
+            <Input
+              placeholder="Match details will appear here..."
+              value={matchInput}
+              onChange={(e) => setMatchInput(e.target.value)}
+              className="flex-1 bg-white/80"
+            />
+            <Button onClick={handleMatchSetup} className="whitespace-nowrap">
+              Set Match
+            </Button>
+          </div>
 
           {matchResult && (
             <motion.div 
@@ -211,10 +244,10 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
             >
               <div className="pb-4">
                 <div className="flex flex-wrap gap-2">
-                  {matchResult.bets?.map((bet, index) => (
+                  {matchResult.bets?.map((bet: string, index: number) => (
                     <div 
                       key={index}
-                      className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium shadow-sm border border-gray-100"
+                      className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium border border-gray-200"
                     >
                       {bet}
                     </div>
@@ -241,7 +274,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
                 <EagleResults eagles={matchResult.details.eagles.eagles} />
               )}
 
-              {matchResult.details?.consolidatedPayments && (
+              {matchResult.details.consolidatedPayments && (
                 <PaymentSummary payments={matchResult.details.consolidatedPayments} />
               )}
             </motion.div>

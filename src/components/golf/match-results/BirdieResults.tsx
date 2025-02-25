@@ -14,9 +14,7 @@ export const BirdieResults = ({ birdies }: BirdieResultsProps) => {
 
   return (
     <div className="pt-4 space-y-2">
-      <div className="flex items-center gap-2">
-        <h4 className="text-sm font-medium">Birdie Results</h4>
-      </div>
+      <h4 className="text-sm font-medium mb-2">Birdie Results</h4>
       {birdies.map((birdie, index) => (
         <div
           key={index}

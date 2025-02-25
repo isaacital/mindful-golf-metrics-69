@@ -1,12 +1,6 @@
 
-// Input types - what the parser returns and scoring module expects
-export interface MatchSetup {
+export interface MatchResult {
   type: ('nassau' | 'match' | 'skins' | 'birdies' | 'eagles' | 'best-ball' | 'press')[];
-  scoringFormat: {
-    type: 'stroke' | 'match';
-    teamScoring: 'aggregate' | 'best-ball' | 'two-best-balls';
-    handicapPercentage: 100 | 90 | 85 | 75 | 50 | 0;
-  };
   amounts: {
     nassau?: number;
     skins?: number;
@@ -22,42 +16,10 @@ export interface MatchSetup {
     teamFormat?: 'individual' | 'bestBall' | 'alternate' | 'scramble';
     handicaps?: 'full' | 'threequarter' | 'half' | 'none';
   };
-}
-
-// Output types - what the scoring module produces
-export interface MatchResult extends MatchSetup {
   winners: string[];
   losers: string[];
   description: string;
   bets: string[];
-  details?: {
-    nassau?: {
-      front9: { winner: string; amount: number };
-      back9: { winner: string; amount: number };
-      total: { winner: string; amount: number };
-      payments: PaymentDetail[];
-    };
-    skins?: {
-      skins: Array<{ hole: number; winner: string; amount: number }>;
-      payments: PaymentDetail[];
-    };
-    birdies?: {
-      birdies: Array<{ hole: number; player: string; amount: number }>;
-      payments: PaymentDetail[];
-    };
-    eagles?: {
-      eagles: Array<{ hole: number; player: string; amount: number }>;
-      payments: PaymentDetail[];
-    };
-    consolidatedPayments?: Array<{
-      from: string;
-      payees: Array<{
-        to: string;
-        amount: number;
-        reason: string;
-      }>;
-    }>;
-  };
 }
 
 export interface PaymentDetail {
