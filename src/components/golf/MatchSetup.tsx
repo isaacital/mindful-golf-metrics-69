@@ -30,6 +30,15 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [holeScores, setHoleScores] = useState<{ [key: number]: { [key: string]: number } }>({});
 
+  const formatGameType = (type: string, amounts: Record<string, number>) => {
+    const words = type.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    );
+    const formattedType = words.join(' ');
+    const amount = amounts[type.toLowerCase()] || amounts[type];
+    return amount ? `${formattedType} ($${amount})` : formattedType;
+  };
+
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
     const netAmounts = new Map<string, number>();
     
@@ -212,8 +221,8 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
                   <div className="space-y-2">
                     <div className="flex flex-wrap gap-2">
                       {matchResult.type.map((type, index) => (
-                        <span key={index} className="px-2 py-1 bg-primary/10 rounded-full text-xs font-medium text-primary">
-                          {type}
+                        <span key={index} className="px-3 py-1.5 bg-primary/10 rounded-full text-xs font-medium text-primary">
+                          {formatGameType(type, matchResult.amounts)}
                         </span>
                       ))}
                     </div>
