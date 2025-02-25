@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { parseMatchInput } from "@/utils/match";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { MatchSetupChat } from "./MatchSetupChat";
 import { NassauResults } from "./match-results/NassauResults";
@@ -9,6 +7,8 @@ import { SkinsResults } from "./match-results/SkinsResults";
 import { BirdieResults } from "./match-results/BirdieResults";
 import { EagleResults } from "./match-results/EagleResults";
 import { PaymentSummary } from "./match-results/PaymentSummary";
+import { MatchConfiguration } from "./match-results/MatchConfiguration";
+import { handleMatchSetup } from "./utils/matchSetupHandler";
 import { MatchResult } from "@/utils/match/types";
 
 interface MatchSetupProps {
@@ -22,51 +22,6 @@ interface MatchSetupProps {
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [holeScores, setHoleScores] = useState<{ [key: number]: { [key: string]: number } }>({});
-
-  const formatGameType = (type: string, amounts: Record<string, number>) => {
-    const words = type.split('-').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    );
-    const formattedType = words.join(' ');
-    const amount = amounts[type.toLowerCase()] || amounts[type];
-    return amount ? `${formattedType} ($${amount})` : formattedType;
-  };
-
-  const formatScoringFormat = (format: MatchResult['scoringFormat'] | undefined) => {
-    if (!format) return '';
-    
-    const parts = [];
-    
-    // Add scoring type (Match vs Stroke)
-    parts.push(format.type === 'match' ? 'Match Play' : 'Stroke Play');
-    
-    // Add team scoring format if applicable
-    switch (format.teamScoring) {
-      case 'best-ball':
-        parts.push('Best Ball');
-        break;
-      case 'two-best-balls':
-        parts.push('2 Best Balls');
-        break;
-      case 'three-best-balls':
-        parts.push('3 Best Balls');
-        break;
-      case 'aggregate':
-        parts.push('Aggregate');
-        break;
-    }
-    
-    // Add handicap percentage if not 100%
-    if (format.handicapPercentage !== 100) {
-      if (format.handicapPercentage === 0) {
-        parts.push('No Handicap');
-      } else {
-        parts.push(`${format.handicapPercentage}% Handicap`);
-      }
-    }
-    
-    return parts.join(' • ');
-  };
 
   const consolidatePayments = (payments: Array<{ from: string; to: string; amount: number; reason: string }>) => {
     const netAmounts = new Map<string, number>();
@@ -131,100 +86,13 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
     }));
   };
 
-  const handleMatchSetup = (result: MatchResult) => {
-    let details: any = {};
-    let allPayments: any[] = [];
-    let newHoleScores: { [key: number]: { [key: string]: number } } = {};
-
-    if (result.amounts.nassau) {
-      const nassauResults = calculateNassauResults(
-        {
-          front9: teamScores.A.gross,
-          back9: teamScores.A.gross,
-          total: teamScores.A.gross
-        },
-        {
-          front9: teamScores.B.gross,
-          back9: teamScores.B.gross,
-          total: teamScores.B.gross
-        },
-        result.amounts.nassau,
-        players
-      );
-
-      details.nassau = nassauResults;
-      if (nassauResults.payments) {
-        allPayments.push(...nassauResults.payments);
-      }
-    }
-
-    if (result.amounts.skins) {
-      const mockScores = players.map((_, playerIndex) => 
-        Array(18).fill(0).map((_, holeIndex) => {
-          if (playerIndex === 0 && (holeIndex === 3 || holeIndex === 12)) {
-            return 3;
-          }
-          if (playerIndex === 1 && holeIndex === 7) {
-            return 3;
-          }
-          return 4 + Math.floor(Math.random() * 3);
-        })
-      );
-      
-      mockScores.forEach((playerScores, playerIndex) => {
-        playerScores.forEach((score, holeIndex) => {
-          if (!newHoleScores[holeIndex + 1]) {
-            newHoleScores[holeIndex + 1] = {};
-          }
-          newHoleScores[holeIndex + 1][players[playerIndex].name] = score;
-        });
-      });
-      
-      const skinsResults = calculateSkinsResults(mockScores, result.amounts.skins, players);
-      details.skins = skinsResults;
-      if (skinsResults.payments) {
-        allPayments.push(...skinsResults.payments);
-      }
-    }
-
-    if (result.amounts.birdies) {
-      const mockScores = players.map((_, playerIndex) => 
-        Array(18).fill(0).map((_, holeIndex) => {
-          if (playerIndex === 0 && (holeIndex === 2 || holeIndex === 11)) {
-            return 3;
-          }
-          if (playerIndex === 1 && holeIndex === 8) {
-            return 3;
-          }
-          return 4;
-        })
-      );
-      const mockPars = Array(18).fill(4);
-      const birdieResults = calculateBirdieResults(mockScores, mockPars, result.amounts.birdies, players);
-      details.birdies = birdieResults;
-      if (birdieResults.payments) {
-        allPayments.push(...birdieResults.payments);
-      }
-    }
-
-    if (result.amounts.eagles) {
-      const mockScores = players.map((_, playerIndex) => 
-        Array(18).fill(0).map((_, holeIndex) => {
-          if (playerIndex === 0 && holeIndex === 5) {
-            return 2;
-          }
-          return 4;
-        })
-      );
-      const mockPars = Array(18).fill(4);
-      const eagleResults = calculateEagleResults(mockScores, mockPars, result.amounts.eagles, players);
-      details.eagles = eagleResults;
-      if (eagleResults.payments) {
-        allPayments.push(...eagleResults.payments);
-      }
-    }
-
-    details.consolidatedPayments = consolidatePayments(allPayments);
+  const onMatchSetup = (result: MatchResult) => {
+    const { details, holeScores: newHoleScores } = handleMatchSetup(
+      result,
+      teamScores,
+      players,
+      consolidatePayments
+    );
     setHoleScores(newHoleScores);
     setMatchResult({ ...result, details });
   };
@@ -236,7 +104,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <MatchSetupChat onMatchSetup={handleMatchSetup} />
+          <MatchSetupChat onMatchSetup={onMatchSetup} />
 
           {matchResult && (
             <motion.div 
@@ -244,57 +112,7 @@ export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-4 divide-y divide-gray-100"
             >
-              <div className="pb-4">
-                <div className="mb-4 p-4 bg-white/80 rounded-lg border border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Match Configuration</h3>
-                  <div className="space-y-4">
-                    {matchResult.scoringFormat && (
-                      <div>
-                        <div className="text-sm font-medium text-gray-700 mb-1">Scoring Format</div>
-                        <div className="text-sm text-gray-600">
-                          {formatScoringFormat(matchResult.scoringFormat)}
-                        </div>
-                      </div>
-                    )}
-                    <div>
-                      <div className="text-sm font-medium text-gray-700 mb-2">Wagers</div>
-                      <div className="flex flex-wrap gap-2">
-                        {matchResult.type.map((type, index) => (
-                          <span key={index} className="px-3 py-1.5 bg-primary/10 rounded-full text-xs font-medium text-primary">
-                            {formatGameType(type, matchResult.amounts)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    {matchResult.settings && (
-                      <div>
-                        <div className="text-sm font-medium text-gray-700 mb-1">Additional Settings</div>
-                        <div className="text-sm text-gray-600">
-                          {matchResult.settings.teamFormat && (
-                            <span className="mr-3">Format: {matchResult.settings.teamFormat}</span>
-                          )}
-                          {matchResult.settings.handicaps && (
-                            <span className="mr-3">Handicaps: {matchResult.settings.handicaps}</span>
-                          )}
-                          {matchResult.settings.automaticPress && (
-                            <span>Auto Press: {matchResult.settings.pressStartHole}-down</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {matchResult.bets?.map((bet, index) => (
-                    <div 
-                      key={index}
-                      className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium shadow-sm border border-gray-100"
-                    >
-                      {bet}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <MatchConfiguration matchResult={matchResult} />
 
               {matchResult.details?.nassau && (
                 <NassauResults nassau={matchResult.details.nassau} />
