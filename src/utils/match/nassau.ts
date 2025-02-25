@@ -62,9 +62,11 @@ export const calculateNassauResults = (
   // Front 9
   const front9Result = determineWinner(teamAScores.front9, teamBScores.front9, isMatchPlay);
   if (front9Result) {
+    // Set the display amount to be the same as what each player would pay
+    const displayAmount = isMatchPlay ? amountPerPlayer : amountPerPlayer * front9Result.score;
     results.front9 = { 
       winner: `Team ${front9Result.team}`, 
-      amount: isMatchPlay ? amount : amount * front9Result.score 
+      amount: displayAmount
     };
     
     const winners = front9Result.team === 'A' ? teamAPlayers : teamBPlayers;
@@ -75,7 +77,7 @@ export const calculateNassauResults = (
         results.payments.push({
           from: loser.name,
           to: winners[index].name,
-          amount: isMatchPlay ? amountPerPlayer : amountPerPlayer * front9Result.score,
+          amount: displayAmount,
           reason: 'Front 9'
         });
       }
@@ -85,9 +87,11 @@ export const calculateNassauResults = (
   // Back 9
   const back9Result = determineWinner(teamAScores.back9, teamBScores.back9, isMatchPlay);
   if (back9Result) {
+    // Set the display amount to be the same as what each player would pay
+    const displayAmount = isMatchPlay ? amountPerPlayer : amountPerPlayer * back9Result.score;
     results.back9 = { 
       winner: `Team ${back9Result.team}`, 
-      amount: isMatchPlay ? amount : amount * back9Result.score 
+      amount: displayAmount
     };
     
     const winners = back9Result.team === 'A' ? teamAPlayers : teamBPlayers;
@@ -98,7 +102,7 @@ export const calculateNassauResults = (
         results.payments.push({
           from: loser.name,
           to: winners[index].name,
-          amount: isMatchPlay ? amountPerPlayer : amountPerPlayer * back9Result.score,
+          amount: displayAmount,
           reason: 'Back 9'
         });
       }
@@ -108,9 +112,11 @@ export const calculateNassauResults = (
   // Total
   const totalResult = determineWinner(teamAScores.total, teamBScores.total, isMatchPlay);
   if (totalResult) {
+    // Set the display amount to be the same as what each player would pay
+    const displayAmount = isMatchPlay ? amountPerPlayer : amountPerPlayer * totalResult.score;
     results.total = { 
       winner: `Team ${totalResult.team}`, 
-      amount: isMatchPlay ? amount : amount * totalResult.score 
+      amount: displayAmount
     };
     
     const winners = totalResult.team === 'A' ? teamAPlayers : teamBPlayers;
@@ -121,17 +127,15 @@ export const calculateNassauResults = (
         results.payments.push({
           from: loser.name,
           to: winners[index].name,
-          amount: isMatchPlay ? amountPerPlayer : amountPerPlayer * totalResult.score,
+          amount: displayAmount,
           reason: 'Total Match'
         });
       }
     });
   }
 
-  results.totalPayout = 
-    (results.front9.amount || 0) + 
-    (results.back9.amount || 0) + 
-    (results.total.amount || 0);
+  // Calculate total payout from actual payments
+  results.totalPayout = results.payments.reduce((sum, payment) => sum + payment.amount, 0);
 
   return results;
 };
