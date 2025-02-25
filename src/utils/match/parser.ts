@@ -23,10 +23,12 @@ export const parseMatchInput = (input: string): MatchResult | null => {
   }
 
   // Parse team scoring format
-  if (input.includes('best ball')) {
-    result.scoringFormat.teamScoring = 'best-ball';
+  if (input.includes('3 best') || input.includes('three best')) {
+    result.scoringFormat.teamScoring = 'three-best-balls';
   } else if (input.includes('2 best') || input.includes('two best')) {
     result.scoringFormat.teamScoring = 'two-best-balls';
+  } else if (input.includes('best ball')) {
+    result.scoringFormat.teamScoring = 'best-ball';
   }
 
   // Parse handicap percentage
@@ -56,6 +58,7 @@ export const parseMatchInput = (input: string): MatchResult | null => {
       `$${amount} Nassau (${result.scoringFormat.type === 'match' ? 'Match' : 'Stroke'} Play, ` +
       `${result.scoringFormat.teamScoring === 'best-ball' ? 'Best Ball' : 
         result.scoringFormat.teamScoring === 'two-best-balls' ? '2 Best Balls' : 
+        result.scoringFormat.teamScoring === 'three-best-balls' ? '3 Best Balls' :
         'Aggregate'}, ` +
       `${result.scoringFormat.handicapPercentage}% Handicap)`
     );
