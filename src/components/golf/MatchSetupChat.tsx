@@ -63,21 +63,21 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
           onMatchSetup(jsonMatch);
           setMessages(prev => [...prev, { 
             role: 'assistant', 
-            content: "Great! I've set up the match format you requested. Let me know if you'd like to make any adjustments." 
+            content: "Perfect! I've set up your match. Is there anything else you'd like to adjust?" 
           }]);
           toast.success("Match format set successfully!");
         } else {
-          // If it's not a valid match format, show the message as a regular response
+          // If it's not a valid match format, we're still processing
           setMessages(prev => [...prev, { 
             role: 'assistant', 
-            content: assistantMessage.content 
+            content: "I'm working on setting up your match. Could you provide a bit more detail about the format you'd like to play?" 
           }]);
         }
       } catch {
-        // If it's not JSON, it's a clarifying question from the AI
+        // If it's not JSON, we're still gathering information
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: assistantMessage.content 
+          content: "I'm working on understanding your match setup. Could you clarify a few details about the format you'd like to play?" 
         }]);
       }
     } catch (error) {
