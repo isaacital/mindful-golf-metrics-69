@@ -56,6 +56,9 @@ export const calculateNassauResults = (
   const teamAPlayers = players.filter(p => p.team === 'A');
   const teamBPlayers = players.filter(p => p.team === 'B');
 
+  // Calculate amount per player (total bet divided by number of players per team)
+  const amountPerPlayer = amount / Math.min(teamAPlayers.length, teamBPlayers.length);
+
   // Front 9
   const front9Result = determineWinner(teamAScores.front9, teamBScores.front9, isMatchPlay);
   if (front9Result) {
@@ -72,7 +75,7 @@ export const calculateNassauResults = (
         results.payments.push({
           from: loser.name,
           to: winners[index].name,
-          amount: isMatchPlay ? amount : amount * front9Result.score,
+          amount: isMatchPlay ? amountPerPlayer : amountPerPlayer * front9Result.score,
           reason: 'Front 9'
         });
       }
@@ -95,7 +98,7 @@ export const calculateNassauResults = (
         results.payments.push({
           from: loser.name,
           to: winners[index].name,
-          amount: isMatchPlay ? amount : amount * back9Result.score,
+          amount: isMatchPlay ? amountPerPlayer : amountPerPlayer * back9Result.score,
           reason: 'Back 9'
         });
       }
@@ -118,7 +121,7 @@ export const calculateNassauResults = (
         results.payments.push({
           from: loser.name,
           to: winners[index].name,
-          amount: isMatchPlay ? amount : amount * totalResult.score,
+          amount: isMatchPlay ? amountPerPlayer : amountPerPlayer * totalResult.score,
           reason: 'Total Match'
         });
       }
