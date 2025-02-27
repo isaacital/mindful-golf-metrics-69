@@ -15,40 +15,76 @@ import { calculateCourseHandicap, calculateTeamScores } from "@/utils/scoreCalcu
 const samplePlayers: Player[] = [
   {
     id: "1",
-    name: "John Smith",
-    handicapIndex: 8.4,
+    name: "Tom Smith",
+    handicapIndex: 2.4,
     tee: "Blue",
-    team: 'A',
-    courseHandicap: 10,
-    scores: [4, 5, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 5, 4, 3, 4, 5, 4],
+    team: "A",
+    courseHandicap: 3,
+    scores: [4, 3, 4, 5, 3, 4, 4, 3, 4, 4, 3, 4, 4, 5, 3, 4, 4, 4], // 69 (very good player)
   },
   {
     id: "2",
     name: "Mike Johnson",
     handicapIndex: 12.1,
     tee: "White",
-    team: 'A',
-    courseHandicap: 14,
-    scores: [5, 6, 5, 4, 5, 6, 5, 5, 4, 6, 5, 5, 6, 5, 4, 5, 6, 5],
+    team: "A",
+    courseHandicap: 13,
+    scores: [5, 6, 5, 4, 5, 6, 5, 4, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5], // 90 (average player)
   },
   {
     id: "3",
     name: "Sarah Williams",
-    handicapIndex: 15.7,
+    handicapIndex: 8.7,
     tee: "Red",
-    team: 'B',
-    courseHandicap: 17,
-    scores: [6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5],
+    team: "B",
+    courseHandicap: 10,
+    scores: [5, 4, 4, 5, 4, 5, 4, 4, 5, 4, 5, 4, 5, 4, 4, 5, 4, 4], // 79 (good player)
   },
   {
     id: "4",
     name: "David Brown",
-    handicapIndex: 10.3,
+    handicapIndex: 15.3,
     tee: "White",
-    team: 'B',
-    courseHandicap: 12,
-    scores: [5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4],
+    team: "B",
+    courseHandicap: 17,
+    scores: [6, 5, 6, 5, 6, 5, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 5], // 98 (bogey golfer)
   },
+  {
+    id: "5",
+    name: "Jack Wilson",
+    handicapIndex: 5.2,
+    tee: "Blue",
+    team: "C",
+    courseHandicap: 6,
+    scores: [4, 4, 3, 5, 4, 4, 3, 4, 4, 3, 4, 4, 5, 4, 3, 4, 4, 4], // 72 (very good player)
+  },
+  {
+    id: "6",
+    name: "Lisa Anderson",
+    handicapIndex: 18.4,
+    tee: "Red",
+    team: "C",
+    courseHandicap: 20,
+    scores: [6, 7, 6, 5, 6, 7, 5, 6, 6, 6, 5, 7, 6, 6, 5, 6, 6, 5], // 106 (higher handicap)
+  },
+  {
+    id: "7",
+    name: "Bob Martinez",
+    handicapIndex: 6.8,
+    tee: "Blue",
+    team: "D",
+    courseHandicap: 8,
+    scores: [4, 5, 4, 4, 3, 5, 4, 4, 4, 4, 4, 5, 4, 4, 3, 5, 4, 4], // 74 (good player)
+  },
+  {
+    id: "8",
+    name: "Emma Davis",
+    handicapIndex: 14.2,
+    tee: "Red",
+    team: "D",
+    courseHandicap: 16,
+    scores: [5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5], // 96 (average-bogey golfer)
+  }
 ];
 
 const Index = () => {
