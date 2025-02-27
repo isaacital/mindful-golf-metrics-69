@@ -23,6 +23,12 @@ export const handleMatchSetup = (
   let newHoleScores: { [key: number]: { [key: string]: number } } = {};
 
   if (result.amounts.nassau || result.amounts.nassauFront || result.amounts.nassauBack || result.amounts.nassauTotal) {
+    const baseAmount = result.amounts.nassau || Math.max(
+      result.amounts.nassauFront || 0,
+      result.amounts.nassauBack || 0,
+      result.amounts.nassauTotal || 0
+    );
+    
     const nassauResults = calculateNassauResults(
       {
         front9: teamScores.A.gross,
@@ -34,12 +40,12 @@ export const handleMatchSetup = (
         back9: teamScores.B.gross,
         total: teamScores.B.gross
       },
-      0, // Set base amount to 0 since we're using specific amounts
+      baseAmount,
       players,
       {
-        front: result.amounts.nassauFront || 0,
-        back: result.amounts.nassauBack || 0,
-        total: result.amounts.nassauTotal || 0
+        front: result.amounts.nassauFront || baseAmount,
+        back: result.amounts.nassauBack || baseAmount,
+        total: result.amounts.nassauTotal || baseAmount
       }
     );
 
