@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -10,13 +11,11 @@ import { PaymentSummary } from "./match-results/PaymentSummary";
 import { MatchConfiguration } from "./match-results/MatchConfiguration";
 import { handleMatchSetup } from "./utils/matchSetupHandler";
 import { MatchResult } from "@/utils/match/types";
+import { TeamScores } from "@/types/golf";
 
 interface MatchSetupProps {
-  teamScores: {
-    A: { gross: number; net: number };
-    B: { gross: number; net: number };
-  };
-  players: { name: string; team: 'A' | 'B' }[];
+  teamScores: TeamScores;
+  players: { name: string; team: string }[];
 }
 
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {

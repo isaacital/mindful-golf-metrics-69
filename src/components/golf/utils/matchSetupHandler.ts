@@ -1,15 +1,10 @@
-
 import { MatchResult } from "@/utils/match/types";
 import { calculateNassauResults, calculateSkinsResults, calculateBirdieResults, calculateEagleResults } from "@/utils/match";
-
-interface TeamScores {
-  A: { gross: number; net: number };
-  B: { gross: number; net: number };
-}
+import { TeamScores } from "@/types/golf";
 
 interface Player {
   name: string;
-  team: 'A' | 'B';
+  team: string;
 }
 
 export const handleMatchSetup = (
@@ -29,17 +24,17 @@ export const handleMatchSetup = (
       result.amounts.nassauTotal || 0
     );
     
+    const teams = Object.keys(teamScores);
+    const teamResults = teams.map(team => ({
+      team,
+      front9: teamScores[team].gross,
+      back9: teamScores[team].gross,
+      total: teamScores[team].gross
+    }));
+    
     const nassauResults = calculateNassauResults(
-      {
-        front9: teamScores.A.gross,
-        back9: teamScores.A.gross,
-        total: teamScores.A.gross
-      },
-      {
-        front9: teamScores.B.gross,
-        back9: teamScores.B.gross,
-        total: teamScores.B.gross
-      },
+      teamResults[0],
+      teamResults[1],
       baseAmount,
       players,
       {

@@ -1,17 +1,8 @@
 
-interface Player {
-  id: string;
-  name: string;
-  handicapIndex: number;
-  tee: string;
-  team: 'A' | 'B';
-  courseHandicap: number;
-  scores: (number | null)[];
-}
+import { Player } from "@/types/golf";
 
 interface TeamScores {
-  A: { gross: number; net: number };
-  B: { gross: number; net: number };
+  [key: string]: { gross: number; net: number };
 }
 
 export const calculateHoleScores = (scores: (number | null)[]) => {
@@ -34,22 +25,17 @@ export const getScoreColor = (scoreToPar: string) => {
 };
 
 export const calculateTeamScores = (players: Player[]): TeamScores => {
-  const teamScores = {
-    A: { gross: 0, net: 0 },
-    B: { gross: 0, net: 0 }
-  };
+  const teams = new Set(players.map(p => p.team));
+  const teamScores: TeamScores = {};
 
-  players.forEach(player => {
-    const totals = calculateHoleScores(player.scores);
-    const netScore = totals.total - player.courseHandicap;
+  teams.forEach(team => {
+    const teamPlayers = players.filter(p => p.team === team);
+    const gross = teamPlayers.reduce((sum, p) => 
+      sum + p.scores.reduce((s, score) => s + (score || 0), 0), 0);
+    const net = teamPlayers.reduce((sum, p) => 
+      sum + (p.scores.reduce((s, score) => s + (score || 0), 0) - p.courseHandicap), 0);
     
-    if (player.team === 'A') {
-      teamScores.A.gross += totals.total;
-      teamScores.A.net += netScore;
-    } else {
-      teamScores.B.gross += totals.total;
-      teamScores.B.net += netScore;
-    }
+    teamScores[team] = { gross, net };
   });
 
   return teamScores;
