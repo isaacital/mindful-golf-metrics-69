@@ -3,27 +3,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, Pencil } from "lucide-react";
 import { AddPlayerDialog } from "./AddPlayerDialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { PlayerCard } from "./PlayerCard";
+import { DeletePlayerDialog } from "./DeletePlayerDialog";
+import { AllPlayersDialog } from "./AllPlayersDialog";
 
 interface Player {
   id: string;
@@ -93,62 +78,6 @@ export const PlayerManagement = () => {
     }
   };
 
-  const renderPlayerCard = (player: Player) => (
-    <div key={player.id} className="flex items-center gap-2 p-2 border rounded-lg bg-background/50">
-      <span className="font-medium truncate flex-1">{player.name}</span>
-      {editingPlayer?.id === player.id ? (
-        <>
-          <Input
-            type="number"
-            step="0.1"
-            value={editingPlayer.handicap_index || ""}
-            onChange={(e) => setEditingPlayer({
-              ...editingPlayer,
-              handicap_index: e.target.value ? parseFloat(e.target.value) : null
-            })}
-            className="w-[80px]"
-          />
-          <Button 
-            variant="default" 
-            size="sm"
-            onClick={() => updateHandicap(player.id, editingPlayer.handicap_index?.toString() || "")}
-          >
-            Save
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setEditingPlayer(null)}
-          >
-            Cancel
-          </Button>
-        </>
-      ) : (
-        <>
-          <span className="text-sm text-muted-foreground whitespace-nowrap">
-            {player.handicap_index?.toFixed(1) ?? '-'}
-          </span>
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={() => setEditingPlayer(player)}
-            className="h-8 w-8"
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={() => setPlayerToDelete(player)}
-            className="h-8 w-8"
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </>
-      )}
-    </div>
-  );
-
   return (
     <>
       <Card>
@@ -158,7 +87,18 @@ export const PlayerManagement = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-left">
-            {players?.slice(0, 6).map(renderPlayerCard)}
+            {players?.slice(0, 6).map((player) => (
+              <PlayerCard
+                key={player.id}
+                player={player}
+                editingPlayer={editingPlayer}
+                onEdit={setEditingPlayer}
+                onDelete={setPlayerToDelete}
+                onSave={updateHandicap}
+                onCancel={() => setEditingPlayer(null)}
+                setEditingPlayer={setEditingPlayer}
+              />
+            ))}
           </div>
           {players && players.length > 6 && (
             <div className="mt-4 text-center">
@@ -170,34 +110,24 @@ export const PlayerManagement = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={showAllPlayers} onOpenChange={setShowAllPlayers}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>All Players</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-left">
-            {players?.map(renderPlayerCard)}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AllPlayersDialog
+        isOpen={showAllPlayers}
+        onOpenChange={setShowAllPlayers}
+        players={players || []}
+        editingPlayer={editingPlayer}
+        onEdit={setEditingPlayer}
+        onDelete={setPlayerToDelete}
+        onSave={updateHandicap}
+        onCancel={() => setEditingPlayer(null)}
+        setEditingPlayer={setEditingPlayer}
+      />
 
-      <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete {playerToDelete?.name} from the player database.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={deletePlayer}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeletePlayerDialog
+        playerName={playerToDelete?.name}
+        isOpen={!!playerToDelete}
+        onOpenChange={(open) => !open && setPlayerToDelete(null)}
+        onConfirm={deletePlayer}
+      />
     </>
   );
 };
