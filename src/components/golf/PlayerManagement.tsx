@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Trash2, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -179,19 +180,19 @@ export const PlayerManagement = () => {
                     </span>
                     <Button 
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       onClick={() => setEditingPlayer(player)}
-                      className="shrink-0"
+                      className="h-8 w-8"
                     >
-                      Edit
+                      <Pencil className="h-4 w-4" />
                     </Button>
                     <Button 
-                      variant="outline"
-                      size="sm"
+                      variant="destructive"
+                      size="icon"
                       onClick={() => setPlayerToDelete(player)}
-                      className="shrink-0"
+                      className="h-8 w-8"
                     >
-                      Delete
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </>
                 )}
@@ -212,7 +213,7 @@ export const PlayerManagement = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={deletePlayer} variant="destructive">
+            <AlertDialogAction onClick={deletePlayer}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
