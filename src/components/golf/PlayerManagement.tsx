@@ -187,12 +187,12 @@ export const PlayerManagement = () => {
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button 
-                      variant="destructive"
+                      variant="outline"
                       size="icon"
                       onClick={() => setPlayerToDelete(player)}
                       className="h-8 w-8"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </>
                 )}
