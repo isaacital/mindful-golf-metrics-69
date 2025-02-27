@@ -1,4 +1,3 @@
-
 import { MatchResult } from './types';
 
 export const parseMatchInput = (input: string): MatchResult | null => {
@@ -17,45 +16,38 @@ export const parseMatchInput = (input: string): MatchResult | null => {
     bets: []
   };
 
-  // Parse scoring format - check for match play first
-  const matchPlayPatterns = ['match play', 'match-play', 'matchplay'];
-  if (matchPlayPatterns.some(pattern => input.includes(pattern))) {
-    result.scoringFormat.type = 'match';
+  // Parse separate Nassau amounts
+  const frontMatch = input.match(/\$?(\d+)\s*(?:front|front ?9)/i);
+  const backMatch = input.match(/\$?(\d+)\s*(?:back|back ?9)/i);
+  const overallMatch = input.match(/\$?(\d+)\s*(?:overall|total)/i);
+
+  // If we find any Nassau-related amounts, it's a Nassau bet
+  if (frontMatch || backMatch || overallMatch) {
+    result.type.push('nassau');
+    
+    const frontAmount = frontMatch ? parseInt(frontMatch[1]) : 0;
+    const backAmount = backMatch ? parseInt(backMatch[1]) : 0;
+    const overallAmount = overallMatch ? parseInt(overallMatch[1]) : 0;
+
+    // Store the individual amounts
+    result.amounts.nassauFront = frontAmount;
+    result.amounts.nassauBack = backAmount;
+    result.amounts.nassauTotal = overallAmount;
+
+    // For backward compatibility, store the highest amount as the main nassau amount
+    result.amounts.nassau = Math.max(frontAmount, backAmount, overallAmount);
+
+    // Add a clear description of the Nassau bet
+    result.bets.push(
+      `Nassau: ${frontAmount ? `$${frontAmount} Front` : ''}${
+        backAmount ? `${frontAmount ? ', ' : ''}$${backAmount} Back` : ''}${
+        overallAmount ? `${(frontAmount || backAmount) ? ', ' : ''}$${overallAmount} Total` : ''}`
+    );
+
+    return result;
   }
 
-  // Parse team scoring format - check most specific patterns first
-  // Handle variations of best ball formats
-  const bestBallPatterns = {
-    three: ['3 best ball', 'three best ball', '3 best-ball', 'three best-ball', '3bb'],
-    two: ['2 best ball', 'two best ball', '2 best-ball', 'two best-ball', '2bb'],
-    one: ['best ball', 'best-ball', 'bb', '1 best ball', 'one best ball']
-  };
-
-  if (bestBallPatterns.three.some(pattern => input.includes(pattern))) {
-    result.scoringFormat.teamScoring = 'three-best-balls';
-  } else if (bestBallPatterns.two.some(pattern => input.includes(pattern))) {
-    result.scoringFormat.teamScoring = 'two-best-balls';
-  } else if (bestBallPatterns.one.some(pattern => input.includes(pattern))) {
-    result.scoringFormat.teamScoring = 'best-ball';
-  }
-
-  // Parse handicap percentage with more variations
-  const handicapPatterns = {
-    90: ['90%', '90 percent', '90 pct', 'ninety percent'],
-    85: ['85%', '85 percent', '85 pct', 'eighty-five percent'],
-    75: ['75%', '75 percent', '75 pct', 'seventy-five percent'],
-    50: ['50%', '50 percent', '50 pct', 'half', 'fifty percent'],
-    0: ['no handicap', 'gross', 'scratch', '0%', 'zero handicap']
-  };
-
-  for (const [percentage, patterns] of Object.entries(handicapPatterns)) {
-    if (patterns.some(pattern => input.includes(pattern))) {
-      result.scoringFormat.handicapPercentage = parseInt(percentage) as 100 | 90 | 85 | 75 | 50 | 0;
-      break;
-    }
-  }
-
-  // Parse all possible bets with more flexible patterns
+  // Handle other betting patterns
   const betPatterns = {
     nassau: /\$?(\d+)\s*(?:nassau|nas)/i,
     skins: /\$?(\d+)\s*(?:skin|skins)/i,
@@ -69,6 +61,9 @@ export const parseMatchInput = (input: string): MatchResult | null => {
     const amount = parseInt(nassauMatch[1]);
     result.type.push('nassau');
     result.amounts.nassau = amount;
+    result.amounts.nassauFront = amount;
+    result.amounts.nassauBack = amount;
+    result.amounts.nassauTotal = amount;
     result.bets.push(
       `$${amount} Nassau (${result.scoringFormat.type === 'match' ? 'Match' : 'Stroke'} Play, ` +
       `${result.scoringFormat.teamScoring === 'best-ball' ? 'Best Ball' : 

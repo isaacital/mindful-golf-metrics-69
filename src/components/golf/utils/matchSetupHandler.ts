@@ -22,7 +22,7 @@ export const handleMatchSetup = (
   let allPayments: any[] = [];
   let newHoleScores: { [key: number]: { [key: string]: number } } = {};
 
-  if (result.amounts.nassau) {
+  if (result.amounts.nassau || result.amounts.nassauFront || result.amounts.nassauBack || result.amounts.nassauTotal) {
     const nassauResults = calculateNassauResults(
       {
         front9: teamScores.A.gross,
@@ -34,8 +34,13 @@ export const handleMatchSetup = (
         back9: teamScores.B.gross,
         total: teamScores.B.gross
       },
-      result.amounts.nassau,
-      players
+      result.amounts.nassau || 0,
+      players,
+      {
+        front: result.amounts.nassauFront,
+        back: result.amounts.nassauBack,
+        total: result.amounts.nassauTotal
+      }
     );
 
     details.nassau = nassauResults;
