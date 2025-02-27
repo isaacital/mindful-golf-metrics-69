@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Trash2, Pencil } from "lucide-react";
+import { AddPlayerDialog } from "./AddPlayerDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,8 +26,6 @@ interface Player {
 }
 
 export const PlayerManagement = () => {
-  const [newPlayerName, setNewPlayerName] = useState("");
-  const [newPlayerHandicap, setNewPlayerHandicap] = useState("");
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
 
@@ -45,34 +44,6 @@ export const PlayerManagement = () => {
       return data as Player[];
     }
   });
-
-  const addPlayer = async () => {
-    if (!newPlayerName) {
-      toast.error('Please enter a player name');
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('players')
-        .insert([
-          {
-            name: newPlayerName,
-            handicap_index: newPlayerHandicap ? parseFloat(newPlayerHandicap) : null,
-          }
-        ]);
-
-      if (error) throw error;
-
-      toast.success('Player added successfully');
-      setNewPlayerName("");
-      setNewPlayerHandicap("");
-      refetch();
-    } catch (error) {
-      toast.error('Failed to add player');
-      console.error('Error adding player:', error);
-    }
-  };
 
   const updateHandicap = async (playerId: string, handicap: string) => {
     try {
@@ -122,24 +93,8 @@ export const PlayerManagement = () => {
           <CardTitle>My Players</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap items-end gap-3 mb-4">
-            <div className="flex-1 min-w-[200px] max-w-[300px]">
-              <Input
-                placeholder="Player Name"
-                value={newPlayerName}
-                onChange={(e) => setNewPlayerName(e.target.value)}
-              />
-            </div>
-            <div className="w-[120px]">
-              <Input
-                placeholder="Handicap"
-                type="number"
-                step="0.1"
-                value={newPlayerHandicap}
-                onChange={(e) => setNewPlayerHandicap(e.target.value)}
-              />
-            </div>
-            <Button onClick={addPlayer} className="shrink-0">Add Player</Button>
+          <div className="mb-4">
+            <AddPlayerDialog onPlayerAdded={refetch} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-left">
