@@ -1,3 +1,4 @@
+
 import { MatchResult } from './types';
 
 export const parseMatchInput = (input: string): MatchResult | null => {
@@ -25,23 +26,24 @@ export const parseMatchInput = (input: string): MatchResult | null => {
   if (frontMatch || backMatch || overallMatch) {
     result.type.push('nassau');
     
-    const frontAmount = frontMatch ? parseInt(frontMatch[1]) : 0;
-    const backAmount = backMatch ? parseInt(backMatch[1]) : 0;
-    const overallAmount = overallMatch ? parseInt(overallMatch[1]) : 0;
-
-    // Store the individual amounts
-    result.amounts.nassauFront = frontAmount;
-    result.amounts.nassauBack = backAmount;
-    result.amounts.nassauTotal = overallAmount;
-
-    // For backward compatibility, store the highest amount as the main nassau amount
-    result.amounts.nassau = Math.max(frontAmount, backAmount, overallAmount);
+    if (frontMatch) {
+      result.amounts.nassauFront = parseInt(frontMatch[1]);
+      console.log('Parsed front amount:', result.amounts.nassauFront);
+    }
+    if (backMatch) {
+      result.amounts.nassauBack = parseInt(backMatch[1]);
+      console.log('Parsed back amount:', result.amounts.nassauBack);
+    }
+    if (overallMatch) {
+      result.amounts.nassauTotal = parseInt(overallMatch[1]);
+      console.log('Parsed total amount:', result.amounts.nassauTotal);
+    }
 
     // Add a clear description of the Nassau bet
     result.bets.push(
-      `Nassau: ${frontAmount ? `$${frontAmount} Front` : ''}${
-        backAmount ? `${frontAmount ? ', ' : ''}$${backAmount} Back` : ''}${
-        overallAmount ? `${(frontAmount || backAmount) ? ', ' : ''}$${overallAmount} Total` : ''}`
+      `Nassau: ${frontMatch ? `$${result.amounts.nassauFront} Front` : ''}${
+        backMatch ? `${frontMatch ? ', ' : ''}$${result.amounts.nassauBack} Back` : ''}${
+        overallMatch ? `${(frontMatch || backMatch) ? ', ' : ''}$${result.amounts.nassauTotal} Total` : ''}`
     );
 
     return result;
@@ -59,6 +61,7 @@ export const parseMatchInput = (input: string): MatchResult | null => {
   const nassauMatch = input.match(betPatterns.nassau);
   if (nassauMatch) {
     const amount = parseInt(nassauMatch[1]);
+    console.log('Parsed uniform Nassau amount:', amount);
     result.type.push('nassau');
     result.amounts.nassau = amount;
     result.amounts.nassauFront = amount;
@@ -105,6 +108,7 @@ export const parseMatchInput = (input: string): MatchResult | null => {
   if (result.type.length === 0) return null;
 
   result.description = result.bets.join(' • ');
+  console.log('Final parsed result:', result);
 
   return result;
 };
