@@ -119,7 +119,7 @@ export const PlayerManagement = () => {
     <>
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Player Database</CardTitle>
+          <CardTitle>My Players</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-end gap-3 mb-4">
