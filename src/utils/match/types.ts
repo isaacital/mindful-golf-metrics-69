@@ -8,6 +8,9 @@ export interface MatchResult {
   };
   amounts: {
     nassau?: number;
+    nassauFront?: number;
+    nassauBack?: number;
+    nassauTotal?: number;
     skins?: number;
     birdies?: number;
     eagles?: number;
