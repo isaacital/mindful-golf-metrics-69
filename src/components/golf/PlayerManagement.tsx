@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Player {
   id: string;
@@ -27,6 +34,7 @@ interface Player {
 export const PlayerManagement = () => {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
+  const [showAllPlayers, setShowAllPlayers] = useState(false);
 
   const { data: players, refetch } = useQuery({
     queryKey: ['players'],
@@ -85,6 +93,62 @@ export const PlayerManagement = () => {
     }
   };
 
+  const renderPlayerCard = (player: Player) => (
+    <div key={player.id} className="flex items-center gap-2 p-2 border rounded-lg bg-background/50">
+      <span className="font-medium truncate flex-1">{player.name}</span>
+      {editingPlayer?.id === player.id ? (
+        <>
+          <Input
+            type="number"
+            step="0.1"
+            value={editingPlayer.handicap_index || ""}
+            onChange={(e) => setEditingPlayer({
+              ...editingPlayer,
+              handicap_index: e.target.value ? parseFloat(e.target.value) : null
+            })}
+            className="w-[80px]"
+          />
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => updateHandicap(player.id, editingPlayer.handicap_index?.toString() || "")}
+          >
+            Save
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setEditingPlayer(null)}
+          >
+            Cancel
+          </Button>
+        </>
+      ) : (
+        <>
+          <span className="text-sm text-muted-foreground whitespace-nowrap">
+            {player.handicap_index?.toFixed(1) ?? '-'}
+          </span>
+          <Button 
+            variant="outline"
+            size="icon"
+            onClick={() => setEditingPlayer(player)}
+            className="h-8 w-8"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline"
+            size="icon"
+            onClick={() => setPlayerToDelete(player)}
+            className="h-8 w-8"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <>
       <Card>
@@ -94,64 +158,28 @@ export const PlayerManagement = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-left">
-            {players?.map((player) => (
-              <div key={player.id} className="flex items-center gap-2 p-2 border rounded-lg bg-background/50">
-                <span className="font-medium truncate flex-1">{player.name}</span>
-                {editingPlayer?.id === player.id ? (
-                  <>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      value={editingPlayer.handicap_index || ""}
-                      onChange={(e) => setEditingPlayer({
-                        ...editingPlayer,
-                        handicap_index: e.target.value ? parseFloat(e.target.value) : null
-                      })}
-                      className="w-[80px]"
-                    />
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={() => updateHandicap(player.id, editingPlayer.handicap_index?.toString() || "")}
-                    >
-                      Save
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setEditingPlayer(null)}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                      {player.handicap_index?.toFixed(1) ?? '-'}
-                    </span>
-                    <Button 
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setEditingPlayer(player)}
-                      className="h-8 w-8"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setPlayerToDelete(player)}
-                      className="h-8 w-8"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </>
-                )}
-              </div>
-            ))}
+            {players?.slice(0, 6).map(renderPlayerCard)}
           </div>
+          {players && players.length > 6 && (
+            <div className="mt-4 text-center">
+              <Button variant="outline" onClick={() => setShowAllPlayers(true)}>
+                See All Players ({players.length})
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      <Dialog open={showAllPlayers} onOpenChange={setShowAllPlayers}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>All Players</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-left">
+            {players?.map(renderPlayerCard)}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
         <AlertDialogContent>
