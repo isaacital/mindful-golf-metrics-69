@@ -62,11 +62,13 @@ export interface PaymentDetail {
 
 export interface Player {
   name: string;
-  team: 'A' | 'B';
+  team: string;
 }
 
 export interface TeamScores {
-  front9: number;
-  back9: number;
-  total: number;
+  [team: string]: {
+    front9: number;
+    back9: number;
+    total: number;
+  };
 }

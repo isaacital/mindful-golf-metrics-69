@@ -1,16 +1,12 @@
-import { MatchResult } from "@/utils/match/types";
+
+import { MatchResult, Player, TeamScores as MatchTeamScores } from "@/utils/match/types";
 import { calculateNassauResults, calculateSkinsResults, calculateBirdieResults, calculateEagleResults } from "@/utils/match";
 import { TeamScores } from "@/types/golf";
-
-interface Player {
-  name: string;
-  team: string;
-}
 
 export const handleMatchSetup = (
   result: MatchResult,
   teamScores: TeamScores,
-  players: Player[],
+  players: { name: string; team: string }[],
   consolidatePayments: (payments: any[]) => any
 ) => {
   let details: any = {};
@@ -31,22 +27,25 @@ export const handleMatchSetup = (
       back9: teamScores[team].gross,
       total: teamScores[team].gross
     }));
-    
-    const nassauResults = calculateNassauResults(
-      teamResults[0],
-      teamResults[1],
-      baseAmount,
-      players,
-      {
-        front: result.amounts.nassauFront || baseAmount,
-        back: result.amounts.nassauBack || baseAmount,
-        total: result.amounts.nassauTotal || baseAmount
-      }
-    );
 
-    details.nassau = nassauResults;
-    if (nassauResults.payments) {
-      allPayments.push(...nassauResults.payments);
+    // For now, only handle the first two teams for Nassau
+    if (teamResults.length >= 2) {
+      const nassauResults = calculateNassauResults(
+        teamResults[0],
+        teamResults[1],
+        baseAmount,
+        players,
+        {
+          front: result.amounts.nassauFront || baseAmount,
+          back: result.amounts.nassauBack || baseAmount,
+          total: result.amounts.nassauTotal || baseAmount
+        }
+      );
+
+      details.nassau = nassauResults;
+      if (nassauResults.payments) {
+        allPayments.push(...nassauResults.payments);
+      }
     }
   }
 
