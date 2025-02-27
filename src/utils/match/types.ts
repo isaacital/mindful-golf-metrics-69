@@ -65,6 +65,13 @@ export interface Player {
   team: string;
 }
 
+export interface TeamScore {
+  teamId: string;
+  front9: number;
+  back9: number;
+  total: number;
+}
+
 export interface TeamScores {
   [team: string]: {
     front9: number;

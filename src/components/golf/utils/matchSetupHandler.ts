@@ -1,5 +1,5 @@
 
-import { MatchResult, Player, TeamScores as MatchTeamScores } from "@/utils/match/types";
+import { MatchResult, Player, TeamScore } from "@/utils/match/types";
 import { calculateNassauResults, calculateSkinsResults, calculateBirdieResults, calculateEagleResults } from "@/utils/match";
 import { TeamScores } from "@/types/golf";
 
@@ -22,7 +22,7 @@ export const handleMatchSetup = (
     
     const teams = Object.keys(teamScores);
     const teamResults = teams.map(team => ({
-      team,
+      teamId: team,
       front9: teamScores[team].gross,
       back9: teamScores[team].gross,
       total: teamScores[team].gross
