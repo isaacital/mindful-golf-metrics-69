@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -15,7 +14,7 @@ interface Player {
   name: string;
   handicapIndex: number;
   tee: string;
-  team: string; // Changed from 'A' | 'B' to string to support multiple teams
+  team: "A" | "B";
   courseHandicap: number;
   scores: (number | null)[];
 }
@@ -89,8 +88,8 @@ const Index = () => {
   const addPlayer = () => {
     if (newPlayerName && newPlayerHandicap && selectedCourse) {
       const courseHandicap = calculateCourseHandicap(parseFloat(newPlayerHandicap), newPlayerTee);
-      const teamIndex = players.length % numberOfTeams;
-      const teamLetter = String.fromCharCode(65 + teamIndex); // Convert 0 -> 'A', 1 -> 'B', etc.
+      const teamIndex = players.length % 2;
+      const teamLetter = teamIndex === 0 ? "A" : "B";
       
       const newPlayer: Player = {
         id: Date.now().toString(),
@@ -116,7 +115,7 @@ const Index = () => {
     }
   };
 
-  const updateTeam = (playerId: string, team: string) => {
+  const updateTeam = (playerId: string, team: "A" | "B") => {
     setPlayers(players.map(player => {
       if (player.id === playerId) {
         return { ...player, team };
@@ -136,25 +135,20 @@ const Index = () => {
   };
 
   const calculateTeamScores = (players: Player[]) => {
-    const scores: { [key: string]: { gross: number; net: number } } = {};
-    
-    // Initialize scores for all teams
-    for (let i = 0; i < numberOfTeams; i++) {
-      const teamLetter = String.fromCharCode(65 + i);
-      scores[teamLetter] = { gross: 0, net: 0 };
-    }
-
-    players.forEach(player => {
-      const totalScore = player.scores.reduce((sum, score) => sum + (score || 0), 0);
-      const netScore = totalScore - player.courseHandicap;
-      
-      if (scores[player.team]) {
-        scores[player.team].gross += totalScore;
-        scores[player.team].net += netScore;
+    return {
+      A: {
+        gross: players.filter(p => p.team === "A")
+          .reduce((sum, p) => sum + p.scores.reduce((s, score) => s + (score || 0), 0), 0),
+        net: players.filter(p => p.team === "A")
+          .reduce((sum, p) => sum + (p.scores.reduce((s, score) => s + (score || 0), 0) - p.courseHandicap), 0)
+      },
+      B: {
+        gross: players.filter(p => p.team === "B")
+          .reduce((sum, p) => sum + p.scores.reduce((s, score) => s + (score || 0), 0), 0),
+        net: players.filter(p => p.team === "B")
+          .reduce((sum, p) => sum + (p.scores.reduce((s, score) => s + (score || 0), 0) - p.courseHandicap), 0)
       }
-    });
-
-    return scores;
+    };
   };
 
   return (
@@ -177,6 +171,17 @@ const Index = () => {
 
           {selectedCourse && (
             <>
+              <AddPlayerForm
+                tees={selectedCourse.tees}
+                newPlayerName={newPlayerName}
+                newPlayerHandicap={newPlayerHandicap}
+                newPlayerTee={newPlayerTee || (selectedCourse.tees[0]?.color ?? '')}
+                onNameChange={setNewPlayerName}
+                onHandicapChange={setNewPlayerHandicap}
+                onTeeChange={setNewPlayerTee}
+                onAddPlayer={addPlayer}
+              />
+
               <div className="flex items-center gap-4 mb-4">
                 <span className="font-medium">Number of Teams:</span>
                 <Select 
@@ -195,17 +200,6 @@ const Index = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              <AddPlayerForm
-                tees={selectedCourse.tees}
-                newPlayerName={newPlayerName}
-                newPlayerHandicap={newPlayerHandicap}
-                newPlayerTee={newPlayerTee || (selectedCourse.tees[0]?.color ?? '')}
-                onNameChange={setNewPlayerName}
-                onHandicapChange={setNewPlayerHandicap}
-                onTeeChange={setNewPlayerTee}
-                onAddPlayer={addPlayer}
-              />
 
               <div className="overflow-auto">
                 <div className="min-w-[1200px]">
