@@ -34,12 +34,12 @@ export const handleMatchSetup = (
         back9: teamScores.B.gross,
         total: teamScores.B.gross
       },
-      result.amounts.nassau || 0,
+      0, // Set base amount to 0 since we're using specific amounts
       players,
       {
-        front: result.amounts.nassauFront,
-        back: result.amounts.nassauBack,
-        total: result.amounts.nassauTotal
+        front: result.amounts.nassauFront || 0,
+        back: result.amounts.nassauBack || 0,
+        total: result.amounts.nassauTotal || 0
       }
     );
 
