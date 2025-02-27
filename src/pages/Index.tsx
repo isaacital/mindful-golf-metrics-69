@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -6,18 +7,10 @@ import { AddPlayerForm } from "@/components/golf/AddPlayerForm";
 import { ScoreCard } from "@/components/golf/ScoreCard";
 import { MatchSetup } from "@/components/golf/MatchSetup";
 import { PlayerManagement } from "@/components/golf/PlayerManagement";
+import { TeamSelector } from "@/components/golf/TeamSelector";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface Player {
-  id: string;
-  name: string;
-  handicapIndex: number;
-  tee: string;
-  team: "A" | "B";
-  courseHandicap: number;
-  scores: (number | null)[];
-}
+import { Player } from "@/types/golf";
+import { calculateCourseHandicap, calculateTeamScores } from "@/utils/scoreCalculations";
 
 const samplePlayers: Player[] = [
   {
@@ -66,12 +59,6 @@ const Index = () => {
   const [newPlayerTee, setNewPlayerTee] = useState("");
   const [numberOfTeams, setNumberOfTeams] = useState(2);
 
-  const calculateCourseHandicap = (handicapIndex: number, tee: string) => {
-    const selectedTee = selectedCourse?.tees?.find(t => t.color === tee);
-    if (!selectedTee) return 0;
-    return Math.round(handicapIndex * (selectedTee.slope / 113) + (selectedTee.rating - 72));
-  };
-
   const updateScore = (playerId: string, holeNumber: number, score: number) => {
     setPlayers(currentPlayers => 
       currentPlayers.map(player => {
@@ -87,7 +74,11 @@ const Index = () => {
 
   const addPlayer = () => {
     if (newPlayerName && newPlayerHandicap && selectedCourse) {
-      const courseHandicap = calculateCourseHandicap(parseFloat(newPlayerHandicap), newPlayerTee);
+      const courseHandicap = calculateCourseHandicap(
+        parseFloat(newPlayerHandicap),
+        newPlayerTee,
+        selectedCourse
+      );
       const teamIndex = players.length % 2;
       const teamLetter = teamIndex === 0 ? "A" : "B";
       
@@ -127,28 +118,11 @@ const Index = () => {
   const updatePlayerTee = (playerId: string, tee: string) => {
     setPlayers(players.map(player => {
       if (player.id === playerId) {
-        const courseHandicap = calculateCourseHandicap(player.handicapIndex, tee);
+        const courseHandicap = calculateCourseHandicap(player.handicapIndex, tee, selectedCourse);
         return { ...player, tee, courseHandicap };
       }
       return player;
     }));
-  };
-
-  const calculateTeamScores = (players: Player[]) => {
-    return {
-      A: {
-        gross: players.filter(p => p.team === "A")
-          .reduce((sum, p) => sum + p.scores.reduce((s, score) => s + (score || 0), 0), 0),
-        net: players.filter(p => p.team === "A")
-          .reduce((sum, p) => sum + (p.scores.reduce((s, score) => s + (score || 0), 0) - p.courseHandicap), 0)
-      },
-      B: {
-        gross: players.filter(p => p.team === "B")
-          .reduce((sum, p) => sum + p.scores.reduce((s, score) => s + (score || 0), 0), 0),
-        net: players.filter(p => p.team === "B")
-          .reduce((sum, p) => sum + (p.scores.reduce((s, score) => s + (score || 0), 0) - p.courseHandicap), 0)
-      }
-    };
   };
 
   return (
@@ -182,24 +156,10 @@ const Index = () => {
                 onAddPlayer={addPlayer}
               />
 
-              <div className="flex items-center gap-4 mb-4">
-                <span className="font-medium">Number of Teams:</span>
-                <Select 
-                  value={numberOfTeams.toString()} 
-                  onValueChange={(value) => setNumberOfTeams(parseInt(value))}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select number of teams" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 9 }, (_, i) => i + 2).map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num} Teams
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <TeamSelector 
+                numberOfTeams={numberOfTeams}
+                onNumberOfTeamsChange={setNumberOfTeams}
+              />
 
               <div className="overflow-auto">
                 <div className="min-w-[1200px]">
