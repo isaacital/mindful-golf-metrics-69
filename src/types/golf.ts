@@ -4,7 +4,7 @@ export interface Player {
   name: string;
   handicapIndex: number;
   tee: string;
-  team: "A" | "B";
+  team: string;
   courseHandicap: number;
   scores: (number | null)[];
 }
@@ -29,6 +29,5 @@ export interface Course {
 }
 
 export interface TeamScores {
-  A: { gross: number; net: number };
-  B: { gross: number; net: number };
+  [key: string]: { gross: number; net: number };
 }

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -21,28 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { EditScoreDialog } from "./EditScoreDialog";
-
-interface Player {
-  id: string;
-  name: string;
-  handicapIndex: number;
-  tee: string;
-  team: string;
-  courseHandicap: number;
-  scores: (number | null)[];
-}
-
-interface Hole {
-  number: number;
-  par: number;
-  handicap: number;
-}
-
-interface Tee {
-  color: string;
-  rating: number;
-  slope: number;
-}
+import { Player, Hole, Tee } from "@/types/golf";
 
 interface ScoreCardProps {
   players: Player[];

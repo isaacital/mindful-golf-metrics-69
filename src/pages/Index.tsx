@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -142,7 +141,7 @@ const Index = () => {
     }
   };
 
-  const updateTeam = (playerId: string, team: "A" | "B") => {
+  const updateTeam = (playerId: string, team: string) => {
     setPlayers(players.map(player => {
       if (player.id === playerId) {
         return { ...player, team };
