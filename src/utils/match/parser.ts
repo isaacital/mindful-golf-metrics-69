@@ -26,24 +26,30 @@ export const parseMatchInput = (input: string): MatchResult | null => {
   if (frontMatch || backMatch || overallMatch) {
     result.type.push('nassau');
     
-    if (frontMatch) {
-      result.amounts.nassauFront = parseInt(frontMatch[1]);
-      console.log('Parsed front amount:', result.amounts.nassauFront);
-    }
-    if (backMatch) {
-      result.amounts.nassauBack = parseInt(backMatch[1]);
-      console.log('Parsed back amount:', result.amounts.nassauBack);
-    }
-    if (overallMatch) {
-      result.amounts.nassauTotal = parseInt(overallMatch[1]);
-      console.log('Parsed total amount:', result.amounts.nassauTotal);
-    }
+    const frontAmount = frontMatch ? parseInt(frontMatch[1]) : 0;
+    const backAmount = backMatch ? parseInt(backMatch[1]) : 0;
+    const overallAmount = overallMatch ? parseInt(overallMatch[1]) : 0;
+
+    // Store the individual amounts
+    result.amounts.nassauFront = frontAmount;
+    result.amounts.nassauBack = backAmount;
+    result.amounts.nassauTotal = overallAmount;
+
+    // For backward compatibility, store the highest amount as the main nassau amount
+    result.amounts.nassau = Math.max(frontAmount, backAmount, overallAmount);
+
+    console.log('Parsed Nassau amounts:', {
+      front: result.amounts.nassauFront,
+      back: result.amounts.nassauBack,
+      total: result.amounts.nassauTotal,
+      base: result.amounts.nassau
+    });
 
     // Add a clear description of the Nassau bet
     result.bets.push(
-      `Nassau: ${frontMatch ? `$${result.amounts.nassauFront} Front` : ''}${
-        backMatch ? `${frontMatch ? ', ' : ''}$${result.amounts.nassauBack} Back` : ''}${
-        overallMatch ? `${(frontMatch || backMatch) ? ', ' : ''}$${result.amounts.nassauTotal} Total` : ''}`
+      `Nassau: ${frontAmount ? `$${frontAmount} Front` : ''}${
+        backAmount ? `${frontAmount ? ', ' : ''}$${backAmount} Back` : ''}${
+        overallAmount ? `${(frontAmount || backAmount) ? ', ' : ''}$${overallAmount} Total` : ''}`
     );
 
     return result;
