@@ -70,14 +70,14 @@ export const MatchSetupChat = ({ onMatchSetup }: MatchSetupChatProps) => {
           // If it's not a valid match format, we're still processing
           setMessages(prev => [...prev, { 
             role: 'assistant', 
-            content: "I'm working on setting up your match. Could you provide a bit more detail about the format you'd like to play?" 
+            content: assistantMessage.content 
           }]);
         }
       } catch {
-        // If it's not JSON, we're still gathering information
+        // If it's not JSON, it's a clarification message
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: "I'm working on understanding your match setup. Could you clarify a few details about the format you'd like to play?" 
+          content: assistantMessage.content 
         }]);
       }
     } catch (error) {
