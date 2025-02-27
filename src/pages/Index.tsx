@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -19,7 +20,7 @@ const samplePlayers: Player[] = [
     tee: "Blue",
     team: "A",
     courseHandicap: 3,
-    scores: [4, 3, 4, 5, 3, 4, 4, 3, 4, 4, 3, 4, 4, 5, 3, 4, 4, 4], // 69 (very good player)
+    scores: [6, 7, 6, 8, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6], // 88
   },
   {
     id: "2",
@@ -28,7 +29,7 @@ const samplePlayers: Player[] = [
     tee: "White",
     team: "A",
     courseHandicap: 13,
-    scores: [5, 6, 5, 4, 5, 6, 5, 4, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5], // 90 (average player)
+    scores: [7, 8, 7, 6, 7, 8, 7, 6, 7, 7, 6, 8, 7, 7, 6, 8, 7, 7], // 91
   },
   {
     id: "3",
