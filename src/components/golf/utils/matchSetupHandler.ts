@@ -21,12 +21,28 @@ export const handleMatchSetup = (
     );
     
     const teams = Object.keys(teamScores);
-    const teamResults = teams.map(team => ({
-      teamId: team,
-      front9: teamScores[team].gross,
-      back9: teamScores[team].gross,
-      total: teamScores[team].gross
-    }));
+    const teamResults = teams.map(team => {
+      const front9Total = players
+        .filter(p => p.team === team)
+        .reduce((sum, player) => {
+          const scores = player.scores?.slice(0, 9) || [];
+          return sum + scores.reduce((s, score) => s + (score || 0), 0);
+        }, 0);
+
+      const back9Total = players
+        .filter(p => p.team === team)
+        .reduce((sum, player) => {
+          const scores = player.scores?.slice(9, 18) || [];
+          return sum + scores.reduce((s, score) => s + (score || 0), 0);
+        }, 0);
+
+      return {
+        teamId: team,
+        front9: front9Total,
+        back9: back9Total,
+        total: front9Total + back9Total
+      };
+    });
 
     // For now, only handle the first two teams for Nassau
     if (teamResults.length >= 2) {
