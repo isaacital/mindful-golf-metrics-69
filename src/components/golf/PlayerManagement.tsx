@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,14 +88,11 @@ export const PlayerManagement = () => {
   return (
     <>
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 flex flex-row items-center justify-between">
           <CardTitle>My Players</CardTitle>
+          <AddPlayerDialog onPlayerAdded={refetch} />
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
-            <AddPlayerDialog onPlayerAdded={refetch} />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-left">
             {players?.map((player) => (
               <div key={player.id} className="flex items-center gap-2 p-2 border rounded-lg bg-background/50">
