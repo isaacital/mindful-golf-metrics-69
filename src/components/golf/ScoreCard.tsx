@@ -27,7 +27,7 @@ interface Player {
   name: string;
   handicapIndex: number;
   tee: string;
-  team: 'A' | 'B';
+  team: string;
   courseHandicap: number;
   scores: (number | null)[];
 }
@@ -48,8 +48,9 @@ interface ScoreCardProps {
   players: Player[];
   holes: Hole[];
   tees: Tee[];
+  numberOfTeams: number;
   onUpdateScore: (playerId: string, holeNumber: number, score: number) => void;
-  onUpdateTeam: (playerId: string, team: 'A' | 'B') => void;
+  onUpdateTeam: (playerId: string, team: string) => void;
   onUpdateTee: (playerId: string, tee: string) => void;
   onRemovePlayer: (playerId: string) => void;
 }
@@ -58,6 +59,7 @@ export const ScoreCard = ({
   players, 
   holes, 
   tees,
+  numberOfTeams,
   onUpdateScore, 
   onUpdateTeam,
   onUpdateTee,
@@ -80,6 +82,12 @@ export const ScoreCard = ({
       onRemovePlayer(playerToDelete.id);
       setPlayerToDelete(null);
     }
+  };
+
+  const getTeamOptions = () => {
+    return Array.from({ length: numberOfTeams }, (_, i) => 
+      String.fromCharCode(65 + i)
+    );
   };
 
   return (
@@ -131,13 +139,14 @@ export const ScoreCard = ({
                       </div>
                     </td>
                     <td className="py-2 px-2">
-                      <Select value={player.team} onValueChange={(team: 'A' | 'B') => onUpdateTeam(player.id, team)}>
+                      <Select value={player.team} onValueChange={(team) => onUpdateTeam(player.id, team)}>
                         <SelectTrigger className="h-8 text-xs">
                           <SelectValue placeholder="Team" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="A">Team A</SelectItem>
-                          <SelectItem value="B">Team B</SelectItem>
+                          {getTeamOptions().map((team) => (
+                            <SelectItem key={team} value={team}>Team {team}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </td>
@@ -176,18 +185,14 @@ export const ScoreCard = ({
                   </tr>
                 );
               })}
-              <tr className="border-t-2 border-gray-300 bg-gray-50">
-                <td colSpan={3} className="py-3 px-2 font-bold">Team A Total</td>
-                <td colSpan={6} className="py-3 px-2 text-right font-bold">
-                  Gross: {teamScores.A.gross} | Net: {teamScores.A.net}
-                </td>
-              </tr>
-              <tr className="border-t border-gray-300 bg-gray-50">
-                <td colSpan={3} className="py-3 px-2 font-bold">Team B Total</td>
-                <td colSpan={6} className="py-3 px-2 text-right font-bold">
-                  Gross: {teamScores.B.gross} | Net: {teamScores.B.net}
-                </td>
-              </tr>
+              {Object.entries(teamScores).map(([team, scores], index) => (
+                <tr key={team} className={`${index === 0 ? 'border-t-2' : 'border-t'} border-gray-300 bg-gray-50`}>
+                  <td colSpan={3} className="py-3 px-2 font-bold">Team {team} Total</td>
+                  <td colSpan={6} className="py-3 px-2 text-right font-bold">
+                    Gross: {scores.gross} | Net: {scores.net}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

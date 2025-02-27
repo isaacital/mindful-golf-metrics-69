@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
@@ -7,13 +8,14 @@ import { ScoreCard } from "@/components/golf/ScoreCard";
 import { MatchSetup } from "@/components/golf/MatchSetup";
 import { PlayerManagement } from "@/components/golf/PlayerManagement";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Player {
   id: string;
   name: string;
   handicapIndex: number;
   tee: string;
-  team: 'A' | 'B';
+  team: string; // Changed from 'A' | 'B' to string to support multiple teams
   courseHandicap: number;
   scores: (number | null)[];
 }
@@ -63,6 +65,7 @@ const Index = () => {
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerHandicap, setNewPlayerHandicap] = useState("");
   const [newPlayerTee, setNewPlayerTee] = useState("");
+  const [numberOfTeams, setNumberOfTeams] = useState(2);
 
   const calculateCourseHandicap = (handicapIndex: number, tee: string) => {
     const selectedTee = selectedCourse?.tees?.find(t => t.color === tee);
@@ -86,12 +89,15 @@ const Index = () => {
   const addPlayer = () => {
     if (newPlayerName && newPlayerHandicap && selectedCourse) {
       const courseHandicap = calculateCourseHandicap(parseFloat(newPlayerHandicap), newPlayerTee);
+      const teamIndex = players.length % numberOfTeams;
+      const teamLetter = String.fromCharCode(65 + teamIndex); // Convert 0 -> 'A', 1 -> 'B', etc.
+      
       const newPlayer: Player = {
         id: Date.now().toString(),
         name: newPlayerName,
         handicapIndex: parseFloat(newPlayerHandicap),
         tee: newPlayerTee,
-        team: players.length % 2 === 0 ? 'A' : 'B',
+        team: teamLetter,
         courseHandicap,
         scores: Array(18).fill(null),
       };
@@ -110,7 +116,7 @@ const Index = () => {
     }
   };
 
-  const updateTeam = (playerId: string, team: 'A' | 'B') => {
+  const updateTeam = (playerId: string, team: string) => {
     setPlayers(players.map(player => {
       if (player.id === playerId) {
         return { ...player, team };
@@ -129,22 +135,22 @@ const Index = () => {
     }));
   };
 
-  const calculateTeamScores = (players: Player[]): { A: { gross: number; net: number }; B: { gross: number; net: number } } => {
-    const scores = {
-      A: { gross: 0, net: 0 },
-      B: { gross: 0, net: 0 }
-    };
+  const calculateTeamScores = (players: Player[]) => {
+    const scores: { [key: string]: { gross: number; net: number } } = {};
+    
+    // Initialize scores for all teams
+    for (let i = 0; i < numberOfTeams; i++) {
+      const teamLetter = String.fromCharCode(65 + i);
+      scores[teamLetter] = { gross: 0, net: 0 };
+    }
 
     players.forEach(player => {
       const totalScore = player.scores.reduce((sum, score) => sum + (score || 0), 0);
       const netScore = totalScore - player.courseHandicap;
       
-      if (player.team === 'A') {
-        scores.A.gross += totalScore;
-        scores.A.net += netScore;
-      } else {
-        scores.B.gross += totalScore;
-        scores.B.net += netScore;
+      if (scores[player.team]) {
+        scores[player.team].gross += totalScore;
+        scores[player.team].net += netScore;
       }
     });
 
@@ -171,6 +177,25 @@ const Index = () => {
 
           {selectedCourse && (
             <>
+              <div className="flex items-center gap-4 mb-4">
+                <span className="font-medium">Number of Teams:</span>
+                <Select 
+                  value={numberOfTeams.toString()} 
+                  onValueChange={(value) => setNumberOfTeams(parseInt(value))}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select number of teams" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 9 }, (_, i) => i + 2).map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num} Teams
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <AddPlayerForm
                 tees={selectedCourse.tees}
                 newPlayerName={newPlayerName}
@@ -192,6 +217,7 @@ const Index = () => {
                     onUpdateTee={updatePlayerTee}
                     onRemovePlayer={removePlayer}
                     tees={selectedCourse.tees}
+                    numberOfTeams={numberOfTeams}
                   />
                 </div>
               </div>
