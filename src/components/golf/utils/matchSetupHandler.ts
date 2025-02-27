@@ -1,12 +1,12 @@
 
-import { MatchResult, Player, TeamScore } from "@/utils/match/types";
+import { MatchResult } from "@/utils/match/types";
 import { calculateNassauResults, calculateSkinsResults, calculateBirdieResults, calculateEagleResults } from "@/utils/match";
-import { TeamScores } from "@/types/golf";
+import { TeamScores, Player } from "@/types/golf";
 
 export const handleMatchSetup = (
   result: MatchResult,
   teamScores: TeamScores,
-  players: { name: string; team: string }[],
+  players: Player[],  // Changed from { name: string; team: string }[] to Player[]
   consolidatePayments: (payments: any[]) => any
 ) => {
   let details: any = {};
@@ -25,14 +25,14 @@ export const handleMatchSetup = (
       const front9Total = players
         .filter(p => p.team === team)
         .reduce((sum, player) => {
-          const scores = player.scores?.slice(0, 9) || [];
+          const scores = player.scores.slice(0, 9);
           return sum + scores.reduce((s, score) => s + (score || 0), 0);
         }, 0);
 
       const back9Total = players
         .filter(p => p.team === team)
         .reduce((sum, player) => {
-          const scores = player.scores?.slice(9, 18) || [];
+          const scores = player.scores.slice(9, 18);
           return sum + scores.reduce((s, score) => s + (score || 0), 0);
         }, 0);
 
@@ -50,7 +50,7 @@ export const handleMatchSetup = (
         teamResults[0],
         teamResults[1],
         baseAmount,
-        players,
+        players.map(p => ({ name: p.name, team: p.team })),
         {
           front: result.amounts.nassauFront || baseAmount,
           back: result.amounts.nassauBack || baseAmount,
@@ -66,28 +66,18 @@ export const handleMatchSetup = (
   }
 
   if (result.amounts.skins) {
-    const mockScores = players.map((_, playerIndex) => 
-      Array(18).fill(0).map((_, holeIndex) => {
-        if (playerIndex === 0 && (holeIndex === 3 || holeIndex === 12)) {
-          return 3;
-        }
-        if (playerIndex === 1 && holeIndex === 7) {
-          return 3;
-        }
-        return 4 + Math.floor(Math.random() * 3);
-      })
-    );
+    const playerScores = players.map(player => player.scores);
     
-    mockScores.forEach((playerScores, playerIndex) => {
-      playerScores.forEach((score, holeIndex) => {
+    playerScores.forEach((scores, playerIndex) => {
+      scores.forEach((score, holeIndex) => {
         if (!newHoleScores[holeIndex + 1]) {
           newHoleScores[holeIndex + 1] = {};
         }
-        newHoleScores[holeIndex + 1][players[playerIndex].name] = score;
+        newHoleScores[holeIndex + 1][players[playerIndex].name] = score || 0;
       });
     });
     
-    const skinsResults = calculateSkinsResults(mockScores, result.amounts.skins, players);
+    const skinsResults = calculateSkinsResults(playerScores, result.amounts.skins, players.map(p => ({ name: p.name, team: p.team })));
     details.skins = skinsResults;
     if (skinsResults.payments) {
       allPayments.push(...skinsResults.payments);
@@ -95,19 +85,14 @@ export const handleMatchSetup = (
   }
 
   if (result.amounts.birdies) {
-    const mockScores = players.map((_, playerIndex) => 
-      Array(18).fill(0).map((_, holeIndex) => {
-        if (playerIndex === 0 && (holeIndex === 2 || holeIndex === 11)) {
-          return 3;
-        }
-        if (playerIndex === 1 && holeIndex === 8) {
-          return 3;
-        }
-        return 4;
-      })
-    );
+    const playerScores = players.map(player => player.scores);
     const mockPars = Array(18).fill(4);
-    const birdieResults = calculateBirdieResults(mockScores, mockPars, result.amounts.birdies, players);
+    const birdieResults = calculateBirdieResults(
+      playerScores,
+      mockPars,
+      result.amounts.birdies,
+      players.map(p => ({ name: p.name, team: p.team }))
+    );
     details.birdies = birdieResults;
     if (birdieResults.payments) {
       allPayments.push(...birdieResults.payments);
@@ -115,16 +100,14 @@ export const handleMatchSetup = (
   }
 
   if (result.amounts.eagles) {
-    const mockScores = players.map((_, playerIndex) => 
-      Array(18).fill(0).map((_, holeIndex) => {
-        if (playerIndex === 0 && holeIndex === 5) {
-          return 2;
-        }
-        return 4;
-      })
-    );
+    const playerScores = players.map(player => player.scores);
     const mockPars = Array(18).fill(4);
-    const eagleResults = calculateEagleResults(mockScores, mockPars, result.amounts.eagles, players);
+    const eagleResults = calculateEagleResults(
+      playerScores,
+      mockPars,
+      result.amounts.eagles,
+      players.map(p => ({ name: p.name, team: p.team }))
+    );
     details.eagles = eagleResults;
     if (eagleResults.payments) {
       allPayments.push(...eagleResults.payments);

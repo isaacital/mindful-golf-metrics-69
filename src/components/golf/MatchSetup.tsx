@@ -11,11 +11,11 @@ import { PaymentSummary } from "./match-results/PaymentSummary";
 import { MatchConfiguration } from "./match-results/MatchConfiguration";
 import { handleMatchSetup } from "./utils/matchSetupHandler";
 import { MatchResult } from "@/utils/match/types";
-import { TeamScores } from "@/types/golf";
+import { TeamScores, Player } from "@/types/golf";
 
 interface MatchSetupProps {
   teamScores: TeamScores;
-  players: { name: string; team: string }[];
+  players: Player[];  // Updated from { name: string; team: string }[] to Player[]
 }
 
 export const MatchSetup = ({ teamScores, players }: MatchSetupProps) => {
